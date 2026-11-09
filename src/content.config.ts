@@ -11,6 +11,10 @@ const experience = defineCollection({
     location: z.string(),
     start: z.string(), // "YYYY-MM", used for ordering and the timeline
     end: z.string(), // "YYYY-MM"
+    // Optional: separate stretches of time in the same role (shown as gaps on the timeline)
+    periods: z.array(z.object({ start: z.string(), end: z.string() })).optional(),
+    // "experience" = jobs, "leadership" = clubs and student roles
+    group: z.enum(["experience", "leadership"]).default("experience"),
     stat: z.string(), // the big headline number on the Experience page
     statLabel: z.string(),
     summary: z.string(),

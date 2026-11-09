@@ -1,10 +1,13 @@
 ---
 company: "Street Denim"
-role: "Sales and Production Planner, previously Quality Control Manager"
-dates: "Jan 2023 to Aug 2025"
+role: "Quality Control Manager, then Sales and Production Planner"
+dates: "Jan 2023 to May 2024, Sep 2024 to Aug 2025"
 location: "New York, NY"
 start: "2023-01"
 end: "2025-08"
+periods:
+  - { start: "2023-01", end: "2024-05" }  # Quality Control Manager
+  - { start: "2024-09", end: "2025-08" }  # Sales and Production Planner
 stat: "$132K"
 statLabel: "in wholesale contracts with Ross, TJ Maxx, Burlington, and Macy's Backstage"
 summary: "Wholesale accounts with Ross, TJ Maxx, Burlington, and Macy's Backstage"

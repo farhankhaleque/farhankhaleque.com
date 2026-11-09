@@ -1,36 +1,43 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { getExperience } from "@/lib/experience";
+import { CURRENT_ROLES } from "@/data/leadership";
 import { url } from "@/consts";
 
-const roles = await getExperience(); // oldest first
+const roles = await getExperience(); // oldest first, jobs and past leadership
+const jobs = roles.filter((r) => r.data.group === "experience");
+const pastLeadership = roles.filter((r) => r.data.group === "leadership");
 
-// Timeline scale: Jan of the first year to Dec of the last year.
+// Timeline scale: from January of the first year up to today (the PRESENT bar).
+// Bars run from the middle of the start month to the middle of the end month,
+// so back to back roles touch without overlapping.
 const months = (ym: string) => {
   const [y, m] = ym.split("-").map(Number);
   return y * 12 + (m - 1);
 };
+const now = new Date();
 const firstYear = Number(roles[0].data.start.slice(0, 4));
-const lastYear = Math.max(...roles.map((r) => Number(r.data.end.slice(0, 4))));
 const origin = firstYear * 12;
-const span = (lastYear - firstYear + 1) * 12;
-const years = Array.from({ length: lastYear - firstYear + 1 }, (_, i) => firstYear + i);
-const pos = (r: (typeof roles)[number]) => ({
-  left: ((months(r.data.start) - origin) / span) * 100,
-  width: ((months(r.data.end) - months(r.data.start) + 1) / span) * 100,
-});
+const presentAt = now.getFullYear() * 12 + now.getMonth() + 0.5 - origin;
+const span = presentAt + 0.5;
+const at = (ym: string) => ((months(ym) - origin + 0.5) / span) * 100;
+const years = Array.from({ length: now.getFullYear() - firstYear + 1 }, (_, i) => firstYear + i);
+const segments = (r: (typeof roles)[number]) =>
+  (r.data.periods ?? [{ start: r.data.start, end: r.data.end }]).map((p) => ({
+    left: at(p.start),
+    width: Math.max(at(p.end) - at(p.start), 0.8),
+  }));
 
-// The first three bullets of each role, for the overview.
-const highlights = await Promise.all(
-  roles.map(async (r) => {
-    const bullets = (r.body ?? "")
-      .split("\n")
-      .filter((l) => l.startsWith("- "))
-      .map((l) => l.slice(2).trim());
-    return bullets.slice(0, 3);
-  }),
+// First three bullets of each role, for the overview.
+const highlights = roles.map((r) =>
+  (r.body ?? "")
+    .split("\n")
+    .filter((l) => l.startsWith("- "))
+    .map((l) => l.slice(2).trim())
+    .slice(0, 3),
 );
 const pad = (n: number) => String(n).padStart(2, "0");
+const total = roles.length + 1; // plus the Present slide
 const nameSize = (name: string) => {
   const longest = Math.max(...name.split(" ").map((w) => w.length));
   if (longest <= 7) return "text-5xl md:text-6xl";
@@ -38,14 +45,22 @@ const nameSize = (name: string) => {
   if (longest <= 11) return "text-3xl md:text-4xl";
   return "text-2xl md:text-3xl";
 };
+const [featured, ...others] = [
+  ...CURRENT_ROLES.filter((c) => c.featured),
+  ...CURRENT_ROLES.filter((c) => !c.featured),
+];
+const groups = [
+  { label: "Experience", items: jobs },
+  { label: "Leadership", items: pastLeadership },
+];
 ---
 
 <Layout
   title="Experience"
-  description="Farhan Khaleque's experience, from pattern making in Dhaka to buying at Bloomingdale's."
+  description="Farhan Khaleque's experience, from pattern making in Dhaka to buying at Bloomingdale's, plus leadership at NYU."
 >
-  <section class="w-full max-w-[1100px] self-center px-4 md:px-8 pt-24 md:pt-28 pb-10">
-    <h1 class="text-5xl md:text-8xl font-display">Experience</h1>
+  <section class="w-full max-w-[1200px] self-center px-4 md:px-8 pt-24 md:pt-28 pb-10">
+    <h1 class="text-[2.6rem] sm:text-6xl md:text-8xl font-display">Experience</h1>
     <p class="text-lg md:text-xl max-w-2xl mt-6">
       From cutting production patterns in Dhaka to buying for Bloomingdale's, oldest first.
     </p>
@@ -53,47 +68,88 @@ const nameSize = (name: string) => {
       Use the arrow keys to step through each role.
     </p>
 
-    <!-- Timeline: one bar per role, positioned by month -->
-    <div class="mt-14" aria-label="Timeline">
-      <div class="relative">
-        <ol class="flex flex-col gap-2">
-          {roles.map((r) => {
-            const p = pos(r);
-            return (
-              <li class="relative h-9">
-                <a
-                  href={`#${r.id}`}
-                  class="tl-bar absolute top-0 h-9"
-                  style={`left:${p.left}%;width:${p.width}%;background-color:${r.data.color}`}
-                  title={`${r.data.company}, ${r.data.dates}`}
-                  aria-label={`${r.data.company}, ${r.data.dates}`}
-                ></a>
-                <a
-                  href={`#${r.id}`}
-                  class="absolute top-0 h-9 flex items-center font-nav text-[11px] md:text-xs whitespace-nowrap pl-2 hover:underline"
-                  style={p.left + p.width > 70 ? `right:${100 - p.left}%;padding-right:.5rem;padding-left:0` : `left:${p.left + p.width}%`}
-                  tabindex="-1"
-                  aria-hidden="true"
-                >{r.data.company}</a>
-              </li>
-            );
-          })}
-        </ol>
+    <!-- Timeline -->
+    <div class="mt-14 grid md:grid-cols-[minmax(0,1fr)_3.5rem_minmax(0,17rem)] items-stretch">
+      <!-- Past: bars by month -->
+      <div class="relative min-w-0">
         <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
-          {years.map((y, i) => (
-            <span class="absolute top-0 bottom-0 border-l border-black/15" style={`left:${(i / years.length) * 100}%`}></span>
+          {years.map((y) => (
+            <span class="absolute top-0 bottom-6 border-l border-black/15" style={`left:${((y * 12 - origin) / span) * 100}%`}></span>
+          ))}
+        </div>
+        {groups.map((g) => (
+          <div class="relative mb-5">
+            <p class="font-nav text-xs tracking-widest border-b border-black pb-1 mb-3 bg-background relative z-10 inline-block pr-3">{g.label}</p>
+            <ol class="flex flex-col gap-2">
+              {g.items.map((r) => {
+                const segs = segments(r);
+                const first = segs[0];
+                const last = segs[segs.length - 1];
+                const end = last.left + last.width;
+                const labelRight = end > 62;
+                return (
+                  <li class="relative h-9">
+                    {segs.map((s) => (
+                      <a
+                        href={`#${r.id}`}
+                        class="tl-bar absolute top-0 h-9"
+                        style={`left:${s.left}%;width:${s.width}%;background-color:${r.data.color}`}
+                        aria-label={`${r.data.company}, ${r.data.dates}`}
+                      ></a>
+                    ))}
+                    <a
+                      href={`#${r.id}`}
+                      class="absolute top-0 h-9 flex items-center font-nav text-[11px] md:text-xs whitespace-nowrap hover:underline"
+                      style={labelRight ? `right:${100 - first.left}%;padding-right:.5rem` : `left:${end}%;padding-left:.5rem`}
+                      tabindex="-1"
+                      aria-hidden="true"
+                    >{r.data.company}</a>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        ))}
+        <div class="relative h-6 font-nav text-xs">
+          {years.map((y) => (
+            <span class="absolute" style={`left:${((y * 12 - origin) / span) * 100}%`}>{y}</span>
           ))}
         </div>
       </div>
-      <div class="relative h-6 mt-2 font-nav text-xs">
-        {years.map((y, i) => (
-          <span class="absolute" style={`left:${(i / years.length) * 100}%`}>{y}</span>
-        ))}
+
+      <!-- PRESENT bar: vertical on desktop, horizontal on phones -->
+      <div class="hidden md:flex justify-center items-stretch gap-2 pb-6" aria-hidden="true">
+        <span class="w-2 bg-black"></span>
+        <span class="present-label font-display text-sm">Present</span>
+      </div>
+      <div class="md:hidden flex items-center gap-3 my-8" aria-hidden="true">
+        <span class="font-display text-sm">Present</span>
+        <span class="h-2 bg-black flex-1"></span>
+      </div>
+
+      <!-- Current roles -->
+      <div class="md:pl-2">
+        <p class="font-nav text-xs tracking-widest border-b border-black pb-1 mb-4 inline-block pr-3">Leadership</p>
+        <a href="#present" class="block group">
+          <p class="font-bold text-lg leading-tight group-hover:underline">{featured.title}</p>
+          <p class="text-sm">{featured.org}</p>
+        </a>
+        <ul class="mt-8 pl-5 border-l border-black/25 flex flex-col gap-4">
+          {others.map((c) => (
+            <li>
+              <a href="#present" class="block group">
+                <p class="font-bold leading-tight group-hover:underline">{c.title}</p>
+                <p class="text-sm">{c.org}</p>
+                {c.since && <p class="font-nav text-[11px] opacity-60 mt-0.5">Since {c.since}</p>}
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   </section>
 
-  <!-- One full-screen section per role -->
+  <!-- One full-screen section per past role -->
   <ol class="w-full">
     {roles.map((r, i) => (
       <li id={r.id} class="role-slide min-h-screen flex items-center border-t border-black/15 py-16 md:py-10">
@@ -102,9 +158,9 @@ const nameSize = (name: string) => {
             class="aspect-[4/3] md:aspect-[4/5] max-h-[78vh] w-full flex flex-col justify-between p-6 md:p-8 text-white"
             style={`background-color:${r.data.color}`}
           >
-            <p class="font-nav text-xs md:text-sm opacity-80 flex justify-between">
-              <span>{pad(i + 1)} / {pad(roles.length)}</span>
-              <span>{r.data.location}</span>
+            <p class="font-nav text-xs md:text-sm opacity-80 flex justify-between gap-4">
+              <span>{pad(i + 1)} / {pad(total)}{r.data.group === "leadership" ? " · Leadership" : ""}</span>
+              <span class="text-right">{r.data.location}</span>
             </p>
             <div>
               <p class="font-nav text-sm md:text-base opacity-90 mb-3">{r.data.dates}</p>
@@ -123,19 +179,51 @@ const nameSize = (name: string) => {
             </ul>
             <div class="flex flex-wrap items-center gap-x-8 gap-y-3 font-nav text-sm">
               <a href={url(`/experience/${r.id}/`)} class="underline underline-offset-4">Full details</a>
-              {i < roles.length - 1 && (
-                <a href={`#${roles[i + 1].id}`} class="opacity-70 hover:opacity-100">Next: {roles[i + 1].data.company} ↓</a>
-              )}
+              <a href={`#${roles[i + 1]?.id ?? "present"}`} class="opacity-70 hover:opacity-100">
+                Next: {roles[i + 1]?.data.company ?? "Present"} ↓
+              </a>
             </div>
           </div>
         </div>
       </li>
     ))}
+
+    <!-- Present: current leadership -->
+    <li id="present" class="role-slide min-h-screen flex items-center border-t border-black/15 py-16 md:py-10">
+      <div class="w-full max-w-[1100px] mx-auto px-4 md:px-8 grid md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] gap-8 md:gap-14 items-center">
+        <div class="aspect-[4/3] md:aspect-[4/5] max-h-[78vh] w-full flex flex-col justify-between p-6 md:p-8 text-white bg-black">
+          <p class="font-nav text-xs md:text-sm opacity-80">{pad(total)} / {pad(total)} · Leadership</p>
+          <div>
+            <p class="font-nav text-sm md:text-base opacity-90 mb-3">Now</p>
+            <h2 class="font-display text-5xl md:text-6xl">Present</h2>
+          </div>
+        </div>
+        <div>
+          <p class="font-bold text-2xl md:text-3xl leading-tight">{featured.title}</p>
+          <p class="text-lg">{featured.org}</p>
+          <ul class="mt-10 pl-6 md:pl-8 border-l-2 border-black flex flex-col gap-8">
+            {others.map((c) => (
+              <li>
+                <p class="font-bold text-xl md:text-2xl leading-tight">{c.title}</p>
+                <p class="text-base md:text-lg">{c.org}</p>
+                {c.since && <p class="font-nav text-xs opacity-60 mt-1">Since {c.since}</p>}
+                {c.text && <p class="text-base md:text-lg mt-2 max-w-lg">{c.text}</p>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </li>
   </ol>
 
   <style>
-    .tl-bar { min-width: 10px; transition: filter 0.2s; }
+    .tl-bar { min-width: 8px; transition: filter 0.2s; }
     .tl-bar:hover { filter: brightness(1.15); }
+    .present-label {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      letter-spacing: 0.05em;
+    }
   </style>
 
   <script>

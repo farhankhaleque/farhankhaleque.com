@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 
 const leadership = [
+  { title: "Peer Advising Leader", org: "NYU College of Arts and Science", when: "Now", text: "" },
   { title: "Creative Director", org: "NYU Madrid MAD Fashion", when: "Jan to May 2026", text: "Led creative direction for the club's fashion show in Madrid, directing 1 stylist, 2 designers, 24 models, and 5 staff members." },
   { title: "Director of Marketing", org: "NYU Stern Luxury and Retail Association", when: "2026 to now", text: "Run marketing for industry events of 60 to 90 attendees, including events with LVMH and Ralph Lauren." },
   { title: "President", org: "NYU Muslim Student Association", when: "2026 to now", text: "Lead the executive board and manage a $28,650 annual budget for approximately 5,000 members." },
@@ -34,7 +35,7 @@ const facts = [
             <p class="text-sm">{l.when}</p>
             <p class="font-bold text-2xl leading-tight">{l.title}</p>
             <p class="mb-2">{l.org}</p>
-            <p class="text-lg">{l.text}</p>
+            {l.text && <p class="text-lg">{l.text}</p>}
           </li>
         ))}
       </ul>
