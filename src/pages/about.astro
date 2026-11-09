@@ -2,12 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import { url } from "@/consts";
 
-// Headshots: put the files in public/headshots/ and set `src`,
-// e.g. src: "/headshots/frontal.jpg". Without `src` they show as placeholders.
-const headshots: { label: string; src?: string }[] = [
-  { label: "Frontal headshot" },
-  { label: "Side profile headshot" },
-];
+// Headshot: the file lives in public/headshots/.
+const headshot = { src: "/headshots/headshot.jpg", alt: "Portrait of Farhan Khaleque" };
 
 const facts = [
   { label: "Education", lines: ["New York University", "B.A. Computer Science & Middle Eastern Studies", "Expected May 2027"] },
@@ -23,17 +19,16 @@ const facts = [
   description="Farhan “Aurangzeb” Khaleque is a New York based designer and supply chain specialist whose work bridges fashion, business, and technology."
 >
   <section class="flex flex-col items-center py-10 pb-32 px-4">
-    <!-- Headshots: frontal and side, on top -->
+    <!-- Headshot, on top -->
     <div class="w-full max-w-5xl pt-20">
-      <div class="grid grid-cols-2 gap-3 md:gap-4 max-w-2xl md:max-w-none">
-        {headshots.map((h) =>
-          h.src ? (
-            <img src={url(h.src)} alt={h.label} class="w-full aspect-[3/4] object-cover" />
-          ) : (
-            <div class="w-full aspect-[3/4] bg-neutral-800" role="img" aria-label={`${h.label} (placeholder)`}></div>
-          ),
-        )}
-      </div>
+      <img
+        src={url(headshot.src)}
+        alt={headshot.alt}
+        width="880"
+        height="1173"
+        class="w-full sm:w-1/2 aspect-[3/4] object-cover"
+        fetchpriority="high"
+      />
     </div>
 
     <div class="w-full max-w-5xl mt-20">
