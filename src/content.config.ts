@@ -1,23 +1,26 @@
 import { glob } from "astro/loaders";
 import { defineCollection, z } from "astro:content";
 
-// One Markdown file per job in src/content/work/
-const work = defineCollection({
-  loader: glob({ base: "./src/content/work", pattern: "**/*.{md,mdx}" }),
+// One Markdown file per job in src/content/experience/
+const experience = defineCollection({
+  loader: glob({ base: "./src/content/experience", pattern: "**/*.{md,mdx}" }),
   schema: z.object({
     company: z.string(),
     role: z.string(),
     dates: z.string(), // shown as written, e.g. "Jun to Jul 2026"
     location: z.string(),
-    order: z.number(), // 1 shows first
+    start: z.string(), // "YYYY-MM", used for ordering and the timeline
+    end: z.string(), // "YYYY-MM"
+    stat: z.string(), // the big headline number on the Experience page
+    statLabel: z.string(),
     summary: z.string(),
     color: z.string().default("#a52a2a"),
   }),
 });
 
-// One Markdown file per project in src/content/collection/
-const collection = defineCollection({
-  loader: glob({ base: "./src/content/collection", pattern: "**/*.{md,mdx}" }),
+// One Markdown file per project in src/content/lookbook/
+const lookbook = defineCollection({
+  loader: glob({ base: "./src/content/lookbook", pattern: "**/*.{md,mdx}" }),
   schema: z.object({
     title: z.string(),
     kicker: z.string(),
@@ -30,4 +33,4 @@ const collection = defineCollection({
   }),
 });
 
-export const collections = { work, collection };
+export const collections = { experience, lookbook };

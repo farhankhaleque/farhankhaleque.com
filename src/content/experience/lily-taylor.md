@@ -3,7 +3,10 @@ company: "Lily&Taylor"
 role: "Ecommerce Merchandising and Brand Management"
 dates: "Aug to Dec 2025"
 location: "New York, NY"
-order: 3
+start: "2025-08"
+end: "2025-12"
+stat: "300+"
+statLabel: "styles live on a Shopify store I built from scratch"
 summary: "Built the Shopify store from scratch and took 300+ styles live"
 color: "#7d6450"
 ---

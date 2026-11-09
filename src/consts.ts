@@ -21,8 +21,8 @@ export const url = (path: string) =>
 
 export const URLS = [
   { href: url("/"), text: "Home" },
-  { href: url("/work"), text: "Work" },
-  { href: url("/collection"), text: "Collection" },
+  { href: url("/experience"), text: "Experience" },
+  { href: url("/lookbook"), text: "Lookbook" },
   { href: url("/about"), text: "About" },
   { href: url("/contact"), text: "Contact" },
 ];

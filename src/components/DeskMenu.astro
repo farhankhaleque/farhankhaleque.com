@@ -6,13 +6,13 @@ import { getCollection } from "astro:content";
 import { SOCIAL_LINKS, SITE_LOCATION, url } from "@/consts";
 
 const [workEntries, collectionEntries] = await Promise.all([
-  getCollection("work"),
-  getCollection("collection"),
+  getCollection("experience"),
+  getCollection("lookbook"),
 ]);
 
 const searchItems = [
-  ...workEntries.map((p) => ({ title: `${p.data.company}, ${p.data.role}`, url: url(`/work/${p.id}/`), collection: "work" })),
-  ...collectionEntries.map((p) => ({ title: p.data.title, url: url(`/collection/${p.id}/`), collection: "collection" })),
+  ...workEntries.map((p) => ({ title: `${p.data.company}, ${p.data.role}`, url: url(`/experience/${p.id}/`), collection: "experience" })),
+  ...collectionEntries.map((p) => ({ title: p.data.title, url: url(`/lookbook/${p.id}/`), collection: "lookbook" })),
 ];
 ---
 

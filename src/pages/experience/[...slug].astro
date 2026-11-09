@@ -1,10 +1,11 @@
 ---
 import { url } from "@/consts";
-import { getCollection, render } from "astro:content";
+import { render } from "astro:content";
+import { getExperience } from "@/lib/experience";
 import Entry from "@/layouts/Entry.astro";
 
 export async function getStaticPaths() {
-  const entries = (await getCollection("work")).sort((a, b) => a.data.order - b.data.order);
+  const entries = await getExperience();
   return entries.map((entry, i) => ({
     params: { slug: entry.id },
     props: { entry, next: entries[(i + 1) % entries.length] },
@@ -21,8 +22,8 @@ const d = entry.data;
   meta={[d.dates, d.location]}
   color={d.color}
   description={`${d.role} at ${d.company}. ${d.summary}.`}
-  back={{ href: url("/work/"), text: "All work" }}
-  next={{ href: url(`/work/${next.id}/`), text: `Next: ${next.data.company}` }}
+  back={{ href: url(`/experience/#${entry.id}`), text: "All experience" }}
+  next={{ href: url(`/experience/${next.id}/`), text: `Next: ${next.data.company}` }}
 >
   <Content />
 </Entry>

@@ -1,10 +1,10 @@
 ---
 import Button from "./Button.astro";
-import { getCollection } from "astro:content";
+import { getExperience, getLookbook } from "@/lib/experience";
 import { SITE_AUTHOR, SITE_EMAIL, SOCIAL_LINKS, URLS, url } from "@/consts";
 
-const work = (await getCollection("work")).sort((a, b) => a.data.order - b.data.order);
-const projects = (await getCollection("collection")).sort((a, b) => a.data.order - b.data.order);
+const work = await getExperience();
+const projects = await getLookbook();
 const year = new Date().getFullYear();
 ---
 
@@ -32,15 +32,15 @@ const year = new Date().getFullYear();
         </ul>
       </div>
       <div>
-        <h2 class="font-nav text-xs tracking-widest mb-3 opacity-70">Work</h2>
+        <h2 class="font-nav text-xs tracking-widest mb-3 opacity-70">Experience</h2>
         <ul class="font-nav text-sm space-y-1">
-          {work.map((e) => <li><a href={url(`/work/${e.id}/`)}>{e.data.company}</a></li>)}
+          {work.map((e) => <li><a href={url(`/experience/${e.id}/`)}>{e.data.company}</a></li>)}
         </ul>
       </div>
       <div>
-        <h2 class="font-nav text-xs tracking-widest mb-3 opacity-70">Collection</h2>
+        <h2 class="font-nav text-xs tracking-widest mb-3 opacity-70">Lookbook</h2>
         <ul class="font-nav text-sm space-y-1">
-          {projects.map((e) => <li><a href={url(`/collection/${e.id}/`)}>{e.data.title}</a></li>)}
+          {projects.map((e) => <li><a href={url(`/lookbook/${e.id}/`)}>{e.data.title}</a></li>)}
         </ul>
       </div>
     </div>

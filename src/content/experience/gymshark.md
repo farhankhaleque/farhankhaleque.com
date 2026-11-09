@@ -3,7 +3,10 @@ company: "Gymshark"
 role: "Operations Team Member"
 dates: "Jun to Sep 2026"
 location: "New York, NY"
-order: 2
+start: "2026-06"
+end: "2026-09"
+stat: "$3K/hr"
+statLabel: "peak point of sale volume I helped run"
 summary: "Inventory, returns, and replenishment with the U.K. team"
 color: "#3b3b3b"
 ---

@@ -3,7 +3,10 @@ company: "Lusaka Group"
 role: "Pattern Maker"
 dates: "May to Dec 2022"
 location: "Dhaka, Bangladesh"
-order: 6
+start: "2022-05"
+end: "2022-12"
+stat: "50"
+statLabel: "production patterns for Karl Lagerfeld, Givenchy Baby, Zara, and more"
 summary: "Production patterns for Karl Lagerfeld, Givenchy Baby, and Zara"
 color: "#5a4e42"
 ---

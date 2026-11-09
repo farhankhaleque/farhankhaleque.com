@@ -1,10 +1,11 @@
 ---
 import { url } from "@/consts";
-import { getCollection, render } from "astro:content";
+import { render } from "astro:content";
+import { getLookbook } from "@/lib/experience";
 import Entry from "@/layouts/Entry.astro";
 
 export async function getStaticPaths() {
-  const entries = (await getCollection("collection")).sort((a, b) => a.data.order - b.data.order);
+  const entries = await getLookbook();
   return entries.map((entry, i) => ({
     params: { slug: entry.id },
     props: { entry, next: entries[(i + 1) % entries.length] },
@@ -23,8 +24,8 @@ const d = entry.data;
   image={d.image && url(d.image)}
   tags={d.tags}
   description={`${d.title}: ${d.description}`}
-  back={{ href: url("/collection/"), text: "Collection" }}
-  next={{ href: url(`/collection/${next.id}/`), text: `Next: ${next.data.title}` }}
+  back={{ href: url("/lookbook/"), text: "Lookbook" }}
+  next={{ href: url(`/lookbook/${next.id}/`), text: `Next: ${next.data.title}` }}
 >
   <Content />
 </Entry>

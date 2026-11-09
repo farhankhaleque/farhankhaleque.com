@@ -3,7 +3,10 @@ company: "Street Denim"
 role: "Sales and Production Planner, previously Quality Control Manager"
 dates: "Jan 2023 to Aug 2025"
 location: "New York, NY"
-order: 4
+start: "2023-01"
+end: "2025-08"
+stat: "$132K"
+statLabel: "in wholesale contracts with Ross, TJ Maxx, Burlington, and Macy's Backstage"
 summary: "Wholesale accounts with Ross, TJ Maxx, Burlington, and Macy's Backstage"
 color: "#2b4a7a"
 ---

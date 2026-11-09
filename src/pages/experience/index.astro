@@ -1,0 +1,170 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getExperience } from "@/lib/experience";
+import { url } from "@/consts";
+
+const roles = await getExperience(); // oldest first
+
+// Timeline scale: Jan of the first year to Dec of the last year.
+const months = (ym: string) => {
+  const [y, m] = ym.split("-").map(Number);
+  return y * 12 + (m - 1);
+};
+const firstYear = Number(roles[0].data.start.slice(0, 4));
+const lastYear = Math.max(...roles.map((r) => Number(r.data.end.slice(0, 4))));
+const origin = firstYear * 12;
+const span = (lastYear - firstYear + 1) * 12;
+const years = Array.from({ length: lastYear - firstYear + 1 }, (_, i) => firstYear + i);
+const pos = (r: (typeof roles)[number]) => ({
+  left: ((months(r.data.start) - origin) / span) * 100,
+  width: ((months(r.data.end) - months(r.data.start) + 1) / span) * 100,
+});
+
+// The first three bullets of each role, for the overview.
+const highlights = await Promise.all(
+  roles.map(async (r) => {
+    const bullets = (r.body ?? "")
+      .split("\n")
+      .filter((l) => l.startsWith("- "))
+      .map((l) => l.slice(2).trim());
+    return bullets.slice(0, 3);
+  }),
+);
+const pad = (n: number) => String(n).padStart(2, "0");
+const nameSize = (name: string) => {
+  const longest = Math.max(...name.split(" ").map((w) => w.length));
+  if (longest <= 7) return "text-5xl md:text-6xl";
+  if (longest <= 9) return "text-4xl md:text-5xl";
+  if (longest <= 11) return "text-3xl md:text-4xl";
+  return "text-2xl md:text-3xl";
+};
+---
+
+<Layout
+  title="Experience"
+  description="Farhan Khaleque's experience, from pattern making in Dhaka to buying at Bloomingdale's."
+>
+  <section class="w-full max-w-[1100px] self-center px-4 md:px-8 pt-24 md:pt-28 pb-10">
+    <h1 class="text-5xl md:text-8xl font-display">Experience</h1>
+    <p class="text-lg md:text-xl max-w-2xl mt-6">
+      From cutting production patterns in Dhaka to buying for Bloomingdale's, oldest first.
+    </p>
+    <p class="font-nav text-xs opacity-60 mt-3 hidden md:block">
+      Use the arrow keys to step through each role.
+    </p>
+
+    <!-- Timeline: one bar per role, positioned by month -->
+    <div class="mt-14" aria-label="Timeline">
+      <div class="relative">
+        <ol class="flex flex-col gap-2">
+          {roles.map((r) => {
+            const p = pos(r);
+            return (
+              <li class="relative h-9">
+                <a
+                  href={`#${r.id}`}
+                  class="tl-bar absolute top-0 h-9"
+                  style={`left:${p.left}%;width:${p.width}%;background-color:${r.data.color}`}
+                  title={`${r.data.company}, ${r.data.dates}`}
+                  aria-label={`${r.data.company}, ${r.data.dates}`}
+                ></a>
+                <a
+                  href={`#${r.id}`}
+                  class="absolute top-0 h-9 flex items-center font-nav text-[11px] md:text-xs whitespace-nowrap pl-2 hover:underline"
+                  style={p.left + p.width > 70 ? `right:${100 - p.left}%;padding-right:.5rem;padding-left:0` : `left:${p.left + p.width}%`}
+                  tabindex="-1"
+                  aria-hidden="true"
+                >{r.data.company}</a>
+              </li>
+            );
+          })}
+        </ol>
+        <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+          {years.map((y, i) => (
+            <span class="absolute top-0 bottom-0 border-l border-black/15" style={`left:${(i / years.length) * 100}%`}></span>
+          ))}
+        </div>
+      </div>
+      <div class="relative h-6 mt-2 font-nav text-xs">
+        {years.map((y, i) => (
+          <span class="absolute" style={`left:${(i / years.length) * 100}%`}>{y}</span>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- One full-screen section per role -->
+  <ol class="w-full">
+    {roles.map((r, i) => (
+      <li id={r.id} class="role-slide min-h-screen flex items-center border-t border-black/15 py-16 md:py-10">
+        <div class="w-full max-w-[1100px] mx-auto px-4 md:px-8 grid md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] gap-8 md:gap-14 items-center">
+          <div
+            class="aspect-[4/3] md:aspect-[4/5] max-h-[78vh] w-full flex flex-col justify-between p-6 md:p-8 text-white"
+            style={`background-color:${r.data.color}`}
+          >
+            <p class="font-nav text-xs md:text-sm opacity-80 flex justify-between">
+              <span>{pad(i + 1)} / {pad(roles.length)}</span>
+              <span>{r.data.location}</span>
+            </p>
+            <div>
+              <p class="font-nav text-sm md:text-base opacity-90 mb-3">{r.data.dates}</p>
+              <h2 class={`font-display ${nameSize(r.data.company)}`}>{r.data.company}</h2>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-6">
+            <div>
+              <p class="font-display text-6xl md:text-8xl" style={`color:${r.data.color}`}>{r.data.stat}</p>
+              <p class="text-lg md:text-xl mt-2 max-w-md">{r.data.statLabel}</p>
+            </div>
+            <p class="font-bold text-xl md:text-2xl leading-snug border-t border-black/20 pt-5">{r.data.role}</p>
+            <ul class="entry text-base md:text-lg">
+              {highlights[i].map((b) => <li>{b}</li>)}
+            </ul>
+            <div class="flex flex-wrap items-center gap-x-8 gap-y-3 font-nav text-sm">
+              <a href={url(`/experience/${r.id}/`)} class="underline underline-offset-4">Full details</a>
+              {i < roles.length - 1 && (
+                <a href={`#${roles[i + 1].id}`} class="opacity-70 hover:opacity-100">Next: {roles[i + 1].data.company} ↓</a>
+              )}
+            </div>
+          </div>
+        </div>
+      </li>
+    ))}
+  </ol>
+
+  <style>
+    .tl-bar { min-width: 10px; transition: filter 0.2s; }
+    .tl-bar:hover { filter: brightness(1.15); }
+  </style>
+
+  <script>
+    // Arrow keys / J and K step through roles like slides.
+    function setup() {
+      const slides = Array.from(document.querySelectorAll<HTMLElement>(".role-slide"));
+      if (!slides.length) return;
+      const current = () => {
+        const mid = window.innerHeight / 3;
+        let idx = -1;
+        slides.forEach((s, i) => {
+          if (s.getBoundingClientRect().top <= mid) idx = i;
+        });
+        return idx;
+      };
+      document.addEventListener("keydown", (e) => {
+        const t = e.target as HTMLElement;
+        if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        const down = ["ArrowDown", "ArrowRight", "j", "PageDown"].includes(e.key);
+        const up = ["ArrowUp", "ArrowLeft", "k", "PageUp"].includes(e.key);
+        if (!down && !up) return;
+        e.preventDefault();
+        const i = current();
+        const next = down ? Math.min(i + 1, slides.length - 1) : i - 1;
+        if (next < 0) window.scrollTo({ top: 0, behavior: "smooth" });
+        else slides[next].scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+    setup();
+  </script>
+</Layout>

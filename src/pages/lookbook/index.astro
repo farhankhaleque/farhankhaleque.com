@@ -1,16 +1,16 @@
 ---
 import { url } from "@/consts";
-import { getCollection } from "astro:content";
+import { getLookbook } from "@/lib/experience";
 import Layout from "@/layouts/Layout.astro";
-const projects = (await getCollection("collection")).sort((a, b) => a.data.order - b.data.order);
+const projects = await getLookbook();
 const [featured, ...rest] = projects;
 ---
 
-<Layout title="Collection" description="Projects by Farhan Khaleque: Aurangzeb, a runway collection, a product content tool, and more.">
+<Layout title="Lookbook" description="Projects by Farhan Khaleque: Aurangzeb, a runway collection, a product content tool, and more.">
   <section class="md:px-6 flex md:flex-row flex-col-reverse w-full gap-6 pt-24 md:pt-24">
     <div class="grid md:grid-cols-2 gap-6 md:gap-x-8 md:mb-32 flex-1">
       <!-- Featured project (Big City's "Destacado") -->
-      <a href={url(`/collection/${featured.id}/`)} class="relative flex min-h-[70vh] md:min-h-[85vh] w-full text-white group overflow-hidden" style={`background-color:${featured.data.color}`}>
+      <a href={url(`/lookbook/${featured.id}/`)} class="relative flex min-h-[70vh] md:min-h-[85vh] w-full text-white group overflow-hidden" style={`background-color:${featured.data.color}`}>
         {featured.data.image && (
           <img src={url(featured.data.image)} alt={featured.data.title} class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition duration-700" />
         )}
@@ -25,7 +25,7 @@ const [featured, ...rest] = projects;
       <ul class="flex flex-col gap-8 py-2">
         {rest.map((p) => (
           <li>
-            <a href={url(`/collection/${p.id}/`)} class="grid grid-cols-2 gap-4 items-start group">
+            <a href={url(`/lookbook/${p.id}/`)} class="grid grid-cols-2 gap-4 items-start group">
               {p.data.image ? (
                 <img src={url(p.data.image)} alt={p.data.title} class="miniature object-cover w-full" loading="lazy" />
               ) : (
@@ -44,7 +44,7 @@ const [featured, ...rest] = projects;
       </ul>
     </div>
     <div class="text-5xl md:text-9xl md:w-24 relative md:mr-6 px-4 md:px-0">
-      <h1 class="md:rotate-90 md:origin-top-left md:translate-x-full md:mt-10 md:whitespace-nowrap font-display">Collection</h1>
+      <h1 class="md:rotate-90 md:origin-top-left md:translate-x-full md:mt-10 md:whitespace-nowrap font-display">Lookbook</h1>
     </div>
   </section>
 </Layout>

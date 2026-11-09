@@ -3,7 +3,10 @@ company: "Bloomingdale's"
 role: "Corporate Buying Intern"
 dates: "Jun to Jul 2026"
 location: "New York, NY"
-order: 1
+start: "2026-06"
+end: "2026-07"
+stat: "$100M+"
+statLabel: "men's designer shoe business across 97 vendors"
 summary: "Men's designer shoes, a $100M+ business across 97 vendors"
 color: "#040404"
 ---

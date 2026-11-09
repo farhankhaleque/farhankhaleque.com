@@ -3,7 +3,10 @@ company: "Pull&Bear"
 role: "Merchandising and Product Developer"
 dates: "May to Aug 2024"
 location: "Dhaka, Bangladesh"
-order: 5
+start: "2024-05"
+end: "2024-08"
+stat: "900K"
+statLabel: "units from 72 styles I designed"
 summary: "72 styles into production, about 900K units"
 color: "#a52a2a"
 ---
