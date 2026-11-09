@@ -12,7 +12,7 @@ interface Props {
   description?: string;
   footer?: boolean;
 }
-const { title, description = SITE_DESCRIPTION, footer = true } = Astro.props;
+const { title, description = SITE_DESCRIPTION, footer = false } = Astro.props;
 const fullTitle = title ? `${title} · ${SITE_TITLE}` : SITE_TITLE;
 ---
 
