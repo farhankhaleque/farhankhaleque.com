@@ -1,0 +1,67 @@
+---
+// Looping animation: a needle bobs up and down in place while the
+// stitch line feeds out to its left, like fabric moving under it.
+interface Props {
+  class?: string;
+}
+const { class: className = "" } = Astro.props;
+---
+
+<svg
+  class={`sewing ${className}`}
+  viewBox="0 0 200 120"
+  role="img"
+  aria-label="A sewing needle stitching"
+>
+  <defs>
+    <clipPath id="sewn-side">
+      <rect x="0" y="0" width="100" height="120"></rect>
+    </clipPath>
+  </defs>
+
+  <!-- fabric -->
+  <line x1="0" y1="82" x2="200" y2="82" stroke="currentColor" stroke-opacity="0.25" stroke-width="1.5"></line>
+  <!-- stitches, only on the sewn (left) side, moving left -->
+  <line
+    class="stitches"
+    x1="0"
+    y1="82"
+    x2="200"
+    y2="82"
+    stroke="currentColor"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-dasharray="10 8"
+    clip-path="url(#sewn-side)"
+  ></line>
+
+  <!-- needle and thread -->
+  <g class="needle">
+    <path d="M100 30 C 100 10, 78 2, 46 4" fill="none" stroke="currentColor" stroke-opacity="0.6" stroke-width="1"></path>
+    <path d="M98 18 Q 100 15 102 18 L102 84 L100 94 L98 84 Z" fill="currentColor"></path>
+    <rect x="99.3" y="23" width="1.4" height="8" rx="0.7" fill="black"></rect>
+  </g>
+</svg>
+
+<style>
+  .sewing {
+    overflow: visible;
+  }
+  .stitches {
+    animation: feed 0.9s linear infinite;
+  }
+  .needle {
+    animation: bob 0.9s ease-in-out infinite;
+  }
+  @keyframes feed {
+    from { stroke-dashoffset: 0; }
+    to { stroke-dashoffset: 18; }
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(-24px); }
+    45%, 55% { transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stitches, .needle { animation: none; }
+  }
+</style>
