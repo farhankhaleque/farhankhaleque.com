@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Farhan Khaleque</title>
+  <meta name="description" content="Portfolio of Farhan Khaleque — projects, experience, and contact.">
+  <link rel="canonical" href="https://www.farhankhaleque.com/">
+  <meta property="og:title" content="Farhan Khaleque">
+  <meta property="og:description" content="Projects, experience, and contact.">
+  <meta property="og:url" content="https://www.farhankhaleque.com/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="#top">FK</a>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#projects">Projects</a>
+      <a href="#experience">Experience</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <p class="eyebrow">Hi, I'm</p>
+      <h1>Farhan Khaleque</h1>
+      <!-- TODO: replace with your own one-line intro -->
+      <p class="lede">Your one-line intro goes here: what you do and what you care about.</p>
+      <div class="cta">
+        <a class="btn primary" href="#projects">See my work</a>
+        <a class="btn" href="#contact">Get in touch</a>
+      </div>
+    </section>
+
+    <section id="about">
+      <h2>About</h2>
+      <!-- TODO: write a short bio -->
+      <p>A few sentences about your background, what you're studying or working on, and what you're looking for next.</p>
+    </section>
+
+    <section id="projects">
+      <h2>Projects</h2>
+      <div class="grid">
+        <!-- TODO: duplicate this card for each project -->
+        <article class="card">
+          <h3>Project name</h3>
+          <p>What it is, what problem it solves, and your role in it.</p>
+          <ul class="tags"><li>Tag</li><li>Tag</li></ul>
+          <a href="#" class="link">View project →</a>
+        </article>
+        <article class="card">
+          <h3>Project name</h3>
+          <p>What it is, what problem it solves, and your role in it.</p>
+          <ul class="tags"><li>Tag</li><li>Tag</li></ul>
+          <a href="#" class="link">View project →</a>
+        </article>
+        <article class="card">
+          <h3>Project name</h3>
+          <p>What it is, what problem it solves, and your role in it.</p>
+          <ul class="tags"><li>Tag</li><li>Tag</li></ul>
+          <a href="#" class="link">View project →</a>
+        </article>
+      </div>
+    </section>
+
+    <section id="experience">
+      <h2>Experience</h2>
+      <!-- TODO: add roles, newest first -->
+      <ol class="timeline">
+        <li>
+          <span class="when">Year – Present</span>
+          <h3>Role · Organization</h3>
+          <p>One or two lines on what you did and the impact.</p>
+        </li>
+        <li>
+          <span class="when">Year – Year</span>
+          <h3>Role · Organization</h3>
+          <p>One or two lines on what you did and the impact.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section id="contact">
+      <h2>Contact</h2>
+      <p>The best way to reach me is by email.</p>
+      <div class="cta">
+        <a class="btn primary" href="mailto:farhankhaleque100@gmail.com">Email me</a>
+        <!-- TODO: add your profile URLs -->
+        <a class="btn" href="#">LinkedIn</a>
+        <a class="btn" href="https://github.com/farhankhaleque">GitHub</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© <span id="year"></span> Farhan Khaleque</p>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
