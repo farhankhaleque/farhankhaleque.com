@@ -1,0 +1,16 @@
+---
+company: "Pull&Bear"
+role: "Merchandising and Product Developer"
+dates: "May to Aug 2024"
+location: "Dhaka, Bangladesh"
+order: 5
+summary: "72 styles into production, about 900K units"
+color: "#a52a2a"
+---
+
+- Designed 72 men's and women's styles that went into production, about 900K units, across outerwear, jackets, shirts, jeans, sweatpants, and skirts
+- Traveled to RMG factories and wash facilities across Bangladesh to follow styles through sampling, washing, and bulk production
+- Built cost BOMs in PLM, submitted cost sheets at proto, SRS, and bulk milestones, and approved development invoices
+- Sourced fabrics and trims, placed trim POs, tracked MOQs, and prepared lab dips and CADs for reviews
+- Attended and documented fittings, and tracked lab dip, wash, embroidery, and print submits with vendors
+- Worked with the compliance team to provide fabric content, fabric codes, and construction details for customs

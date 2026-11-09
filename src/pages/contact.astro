@@ -1,0 +1,19 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Button from "@/components/Button.astro";
+import { SITE_EMAIL, SOCIAL_LINKS } from "@/consts";
+---
+
+<Layout title="Contact" description="Get in touch with Farhan Khaleque." footer={false}>
+  <section class="flex grow py-32 flex-col justify-center items-center px-4 text-center">
+    <h1 class="text-6xl md:text-9xl font-fugaz pb-8">Let's talk.</h1>
+    <p class="text-xl max-w-lg mb-12">
+      I'm always happy to hear about roles in merchandising, buying, product development, and ecommerce, or just to talk shop.
+    </p>
+    <a href={SOCIAL_LINKS.email} class="text-2xl md:text-4xl underline underline-offset-8 mb-16 break-all">{SITE_EMAIL}</a>
+    <div class="flex flex-col md:flex-row gap-12 md:gap-16">
+      <Button text="Email me" href={SOCIAL_LINKS.email} />
+      <Button text="LinkedIn" href={SOCIAL_LINKS.linkedin} />
+    </div>
+  </section>
+</Layout>

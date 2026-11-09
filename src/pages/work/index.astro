@@ -1,0 +1,23 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import Card from "@/components/ui/Card.astro";
+const entries = (await getCollection("work")).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Layout title="Work" description="Farhan Khaleque's experience in buying, merchandising, production, and product development.">
+  <section class="flex flex-col gap-16 py-10 max-w-[1000px] w-full self-center px-4 md:px-6">
+    <div class="pt-24 md:pt-28">
+      <h1 class="text-5xl md:text-8xl font-fugaz">Work</h1>
+      <p class="text-xl max-w-xl mt-6">Buying, merchandising, production, and product development, in New York and Dhaka.</p>
+    </div>
+    <div class="grid md:grid-cols-2 md:gap-x-20 mb-24">
+      <ul>
+        {entries.filter((_, i) => i % 2 === 0).map((e, i) => <Card entry={e} index={i * 2} />)}
+      </ul>
+      <ul class="md:pt-32">
+        {entries.filter((_, i) => i % 2 !== 0).map((e, i) => <Card entry={e} index={i * 2 + 1} />)}
+      </ul>
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,50 @@
+---
+import Button from "./Button.astro";
+import { getCollection } from "astro:content";
+import { SITE_AUTHOR, SITE_EMAIL, SOCIAL_LINKS, URLS } from "@/consts";
+
+const work = (await getCollection("work")).sort((a, b) => a.data.order - b.data.order);
+const projects = (await getCollection("collection")).sort((a, b) => a.data.order - b.data.order);
+const year = new Date().getFullYear();
+---
+
+<footer class="relative bg-muted pt-10 w-full md:pb-6 border-t z-10 max-w-full overflow-hidden">
+  <div class="container px-5 mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:pr-[17%]">
+    <div class="flex flex-col items-start gap-8 col-span-1">
+      <p class="text-3xl md:text-4xl font-fugaz max-w-md">Want to work together?</p>
+      <Button text="Let's chat" href="/contact" />
+    </div>
+    <div class="flex flex-col justify-between col-span-1 md:pl-10">
+      <p class="text-lg max-w-md">
+        I'm looking for roles in merchandising, buying, product development, and ecommerce. The fastest way to reach me is email.
+      </p>
+      <div class="flex justify-between items-center mt-12 mb-6 gap-4 flex-wrap">
+        <a href={SOCIAL_LINKS.email} class="underline underline-offset-4">{SITE_EMAIL}</a>
+        <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener" class="underline underline-offset-4">LinkedIn</a>
+      </div>
+    </div>
+    <hr class="col-span-1 md:col-span-2" />
+    <div class="col-span-1 md:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-8 py-4">
+      <div>
+        <h2 class="text-sm uppercase tracking-widest mb-2">Menu</h2>
+        <ul class="font-bold space-y-1">
+          {URLS.map((u) => <li><a href={u.href}>{u.text}</a></li>)}
+        </ul>
+      </div>
+      <div>
+        <h2 class="text-sm uppercase tracking-widest mb-2">Work</h2>
+        <ul class="font-bold space-y-1">
+          {work.map((e) => <li><a href={`/work/${e.id}/`}>{e.data.company}</a></li>)}
+        </ul>
+      </div>
+      <div>
+        <h2 class="text-sm uppercase tracking-widest mb-2">Collection</h2>
+        <ul class="font-bold space-y-1">
+          {projects.map((e) => <li><a href={`/collection/${e.id}/`}>{e.data.title}</a></li>)}
+        </ul>
+      </div>
+    </div>
+    <hr class="col-span-1 md:col-span-2" />
+    <p class="col-span-1 md:col-span-2 text-center pb-24 md:pb-6 text-sm">© {year} {SITE_AUTHOR} · New York</p>
+  </div>
+</footer>

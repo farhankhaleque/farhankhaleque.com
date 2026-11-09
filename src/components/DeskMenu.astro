@@ -1,0 +1,29 @@
+---
+import { Icon } from "astro-icon/components";
+import DeskNav from "@/components/react/DeskNav";
+import SearchBar from "@/components/react/SearchBar";
+import { getCollection } from "astro:content";
+import { SOCIAL_LINKS, SITE_LOCATION } from "@/consts";
+
+const [workEntries, collectionEntries] = await Promise.all([
+  getCollection("work"),
+  getCollection("collection"),
+]);
+
+const searchItems = [
+  ...workEntries.map((p) => ({ title: `${p.data.company}, ${p.data.role}`, url: `/work/${p.id}/`, collection: "work" })),
+  ...collectionEntries.map((p) => ({ title: p.data.title, url: `/collection/${p.id}/`, collection: "collection" })),
+];
+---
+
+<section class="hidden p-2 fixed right-6 md:flex flex-col w-2/12 py-10 justify-between h-full min-h-screen z-30">
+  <div class="flex justify-end relative z-10">
+    <SearchBar items={searchItems} client:idle />
+  </div>
+  <DeskNav client:idle />
+  <div class="flex flex-col justify-end items-end text-3xl gap-5 relative z-10">
+    <span class="text-base rotate-90 absolute -top-24 -right-4 whitespace-nowrap">{SITE_LOCATION} &reg;</span>
+    <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener" aria-label="LinkedIn"><Icon name="linkedin" /></a>
+    <a href={SOCIAL_LINKS.email} aria-label="Email"><Icon name="mail" /></a>
+  </div>
+</section>

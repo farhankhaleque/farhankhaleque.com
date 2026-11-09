@@ -1,0 +1,24 @@
+---
+// Staggered card from the Big City blog grid, used for work entries.
+interface Props {
+  entry: any;
+  index: number;
+}
+const { entry, index } = Astro.props;
+const offsets = ["md:mt-0", "md:mt-40", "md:mt-24", "md:mt-56", "md:mt-16", "md:mt-32"];
+const d = entry.data;
+---
+
+<li class={`${offsets[index % offsets.length]} relative`}>
+  <a href={`/work/${entry.id}/`} class="group relative flex flex-col gap-3 p-6 pr-10 max-w-96">
+    <div
+      class="miniature w-full flex items-end p-5 text-white transition-transform duration-500 ease-fluid group-hover:-translate-y-2"
+      style={`background-color:${d.color}`}
+    >
+      <p class="font-fugaz text-3xl leading-tight">{d.company}</p>
+    </div>
+    <p class="font-semibold text-2xl leading-tight">{d.role}</p>
+    <p class="text-lg">{d.summary}</p>
+  </a>
+  <p class="absolute rotate-90 origin-bottom-right right-3 top-24 font-bold whitespace-nowrap">{d.dates}</p>
+</li>

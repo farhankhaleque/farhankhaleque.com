@@ -1,0 +1,49 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+const projects = (await getCollection("collection")).sort((a, b) => a.data.order - b.data.order);
+const [featured, ...rest] = projects;
+---
+
+<Layout title="Collection" description="Projects by Farhan Khaleque: Aurangzeb, a runway collection, a product content tool, and more.">
+  <section class="md:px-6 flex md:flex-row flex-col-reverse w-full gap-6 pt-24 md:pt-24">
+    <div class="grid md:grid-cols-2 gap-6 md:gap-x-8 md:mb-32 flex-1">
+      <!-- Featured project (Big City's "Destacado") -->
+      <a href={`/collection/${featured.id}/`} class="relative flex min-h-[70vh] md:min-h-[85vh] w-full text-white group overflow-hidden" style={`background-color:${featured.data.color}`}>
+        {featured.data.image && (
+          <img src={featured.data.image} alt={featured.data.title} class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition duration-700" />
+        )}
+        <div class="absolute bottom-10 left-6 right-6 flex flex-col gap-3">
+          <p class="text-sm uppercase tracking-[0.2em] opacity-80">{featured.data.kicker}</p>
+          <p class="font-fugaz text-6xl md:text-7xl leading-none">{featured.data.title}</p>
+          <p class="text-2xl max-w-sm">{featured.data.description}</p>
+          <p class="mt-2 underline underline-offset-4">See the project</p>
+        </div>
+      </a>
+      <!-- Other projects (Big City's "CardLanding") -->
+      <ul class="flex flex-col gap-8 py-2">
+        {rest.map((p) => (
+          <li>
+            <a href={`/collection/${p.id}/`} class="grid grid-cols-2 gap-4 items-start group">
+              {p.data.image ? (
+                <img src={p.data.image} alt={p.data.title} class="miniature object-cover w-full" loading="lazy" />
+              ) : (
+                <div class="miniature w-full flex items-end p-3 text-white group-hover:-translate-y-1 transition" style={`background-color:${p.data.color}`}>
+                  <span class="font-fugaz text-xl leading-tight">{p.data.title}</span>
+                </div>
+              )}
+              <div class="flex flex-col gap-1">
+                <p class="text-sm">{p.data.kicker}</p>
+                <p class="font-bold text-xl leading-snug">{p.data.title}</p>
+                <p>{p.data.description}</p>
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div class="text-5xl md:text-9xl md:w-24 relative md:mr-6 px-4 md:px-0">
+      <h1 class="md:rotate-90 md:origin-top-left md:translate-x-full md:mt-10 md:whitespace-nowrap font-fugaz">Collection</h1>
+    </div>
+  </section>
+</Layout>

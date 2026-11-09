@@ -1,0 +1,52 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const leadership = [
+  { title: "Creative Director", org: "NYU Madrid MAD Fashion", when: "Jan to May 2026", text: "Led creative direction for the club's fashion show in Madrid, directing 1 stylist, 2 designers, 24 models, and 5 staff members." },
+  { title: "Director of Marketing", org: "NYU Stern Luxury and Retail Association", when: "2026 to now", text: "Run marketing for industry events of 60 to 90 attendees, including events with LVMH and Ralph Lauren." },
+  { title: "President", org: "NYU Muslim Student Association", when: "2026 to now", text: "Lead the executive board and manage a $28,650 annual budget for approximately 5,000 members." },
+  { title: "Senator at Large", org: "NYU Student Government Assembly", when: "2026 to now", text: "Serve in a 40 senator assembly, drafting legislation and funding proposals for student initiatives." },
+];
+
+const facts = [
+  { label: "Education", lines: ["New York University", "B.A. Computer Science & Middle Eastern Studies", "Expected May 2027"] },
+  { label: "Awards", lines: ["YouTube Silver Play Button", "Gunter Georgi Award for Outstanding Engineering, NYU Tandon", "Dream Big Be Bold Award (x2), Bloomingdale's"] },
+  { label: "Certifications", lines: ["Google Ads, Google Analytics, Google AI", "Microsoft Office Specialist Excel Expert", "Lean Six Sigma Yellow Belt", "Inside LVMH (2026)"] },
+  { label: "Languages", lines: ["English, Bengali, Hindi, and Urdu (fluent)", "Arabic and Spanish (working proficiency)"] },
+  { label: "Tools", lines: ["Shopify, Excel, SQL & BigQuery, Python", "PLM, NuOrder, Joor, SAP", "Klaviyo, Google Analytics, Photoshop, Premiere Pro"] },
+];
+---
+
+<Layout title="About" description="About Farhan Khaleque: NYU Computer Science, fashion merchandising and product development.">
+  <section class="flex flex-col items-center py-10 pb-32 px-4">
+    <h1 class="text-6xl md:text-8xl font-fugaz pt-20 pb-12 max-w-2xl text-center">Know Farhan</h1>
+    <div class="max-w-xl text-xl flex flex-col gap-5">
+      <p>I'm studying Computer Science and Middle Eastern Studies at NYU, and I graduate in May 2027.</p>
+      <p>Most of what I know about fashion I learned by doing it. I started as a pattern maker at Lusaka Group, then designed for Pull&amp;Bear and spent a lot of time in factories and wash facilities around Bangladesh. At Street Denim I went from checking samples to managing wholesale accounts. This past summer I was on the men's designer shoe team at Bloomingdale's.</p>
+      <p>The coding side snuck in because the work kept asking for it. A stock check that took hours every day turned into a script. A store that needed 300 styles uploaded turned into a Shopify build. Now I like to sit right where those two things meet.</p>
+    </div>
+
+    <div class="w-full max-w-4xl mt-28">
+      <h2 class="font-fugaz text-4xl md:text-6xl mb-10">Leadership</h2>
+      <ul class="grid md:grid-cols-2 gap-x-12 gap-y-10">
+        {leadership.map((l) => (
+          <li class="border-t pt-4">
+            <p class="text-sm">{l.when}</p>
+            <p class="font-bold text-2xl leading-tight">{l.title}</p>
+            <p class="mb-2">{l.org}</p>
+            <p class="text-lg">{l.text}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <dl class="w-full max-w-4xl mt-28 grid md:grid-cols-2 gap-x-12 gap-y-8">
+      {facts.map((f) => (
+        <div class="border-t pt-4">
+          <dt class="text-sm uppercase tracking-widest mb-2">{f.label}</dt>
+          {f.lines.map((line) => <dd class="text-lg">{line}</dd>)}
+        </div>
+      ))}
+    </dl>
+  </section>
+</Layout>
