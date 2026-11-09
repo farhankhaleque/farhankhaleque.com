@@ -16,7 +16,7 @@ const [featured, ...rest] = projects;
         )}
         <div class="absolute bottom-10 left-6 right-6 flex flex-col gap-3">
           <p class="font-nav text-sm opacity-80">{featured.data.kicker}</p>
-          <p class="font-display text-6xl md:text-7xl leading-none">{featured.data.title}</p>
+          <p class="font-display text-[clamp(2.25rem,3.6vw,4.5rem)] leading-none">{featured.data.title}</p>
           <p class="text-2xl max-w-sm">{featured.data.description}</p>
           <p class="mt-2 underline underline-offset-4">See the project</p>
         </div>
@@ -43,7 +43,7 @@ const [featured, ...rest] = projects;
         ))}
       </ul>
     </div>
-    <div class="text-5xl md:text-9xl md:w-24 relative md:mr-6 px-4 md:px-0">
+    <div class="text-[clamp(1.9rem,9vw,3rem)] md:text-[clamp(4rem,9vh,8rem)] md:w-24 relative md:mr-6 px-4 md:px-0">
       <h1 class="md:rotate-90 md:origin-top-left md:translate-x-full md:mt-10 md:whitespace-nowrap font-display">Lookbook</h1>
     </div>
   </section>
