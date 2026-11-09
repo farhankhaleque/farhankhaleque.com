@@ -23,4 +23,4 @@ Then open http://localhost:8000.
 
 ## Editing
 
-Placeholder content is marked with `<!-- TODO -->` comments in `index.html`.
+All content lives in `index.html`; styles are in `assets/style.css`.
