@@ -1,6 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { PHOTOS, SOURCES } from "@/data/gallery";
+import { PHOTOS } from "@/data/gallery";
 import { url } from "@/consts";
 
 const counts = new Map<string, number>();
@@ -9,69 +9,29 @@ const tiles = PHOTOS.map((p) => {
   counts.set(p.source, n);
   return { ...p, n };
 });
-const sources = SOURCES.filter((s) => counts.has(s));
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-const pad = (n: number) => String(n).padStart(2, "0");
 ---
 
 <Layout title="Lookbook" description="Lookbook: photos of Farhan Khaleque's work across Aurangzeb, runway shows, Pull&Bear, Street Denim, and more.">
-  <section class="w-full max-w-[1200px] self-center px-4 md:px-8 pt-24 md:pt-28 pb-24">
-    <h1 class="text-[clamp(1.9rem,8.2vw,6rem)] font-display">Lookbook</h1>
-    <p class="text-lg md:text-xl max-w-2xl mt-6">Work from across my experience.</p>
-
-    <div class="flex flex-wrap gap-2 mt-10 mb-10 font-nav text-xs" role="group" aria-label="Filter by experience">
-      <button type="button" class="lb-filter is-active" data-filter="all">All</button>
-      {sources.map((s) => (
-        <button type="button" class="lb-filter" data-filter={slug(s)}>{s}</button>
-      ))}
-    </div>
-
-    <ul class="columns-2 md:columns-3 gap-3 md:gap-4">
+  <section class="w-full flex flex-col-reverse md:flex-row gap-6 md:gap-0 px-4 md:px-6 pt-24 pb-24">
+    <ul class="flex-1 min-w-0 columns-2 md:columns-3 gap-3 md:gap-4">
       {tiles.map((t) => (
-        <li class="lb-tile break-inside-avoid mb-3 md:mb-4" data-source={slug(t.source)}>
+        <li class="break-inside-avoid mb-3 md:mb-4">
           {t.src ? (
-            <figure>
-              <img src={url(t.src)} alt={t.alt ?? t.source} loading="lazy" class="w-full block" />
-              <figcaption class="font-nav text-[11px] mt-2 opacity-70">{t.source}</figcaption>
-            </figure>
+            <img src={url(t.src)} alt={t.alt ?? t.source} loading="lazy" class="w-full block" />
           ) : (
             <div
-              class="w-full bg-neutral-800 border border-white/10 flex flex-col justify-between p-3 md:p-4"
+              class="w-full bg-neutral-800"
               style={`aspect-ratio:${t.ratio ?? "3/4"}`}
               role="img"
               aria-label={`${t.source}, photo ${t.n} (placeholder)`}
-            >
-              <span class="font-nav text-[10px] md:text-[11px] opacity-50">{pad(t.n)}</span>
-              <span class="font-nav text-[11px] md:text-xs opacity-80">{t.source}</span>
-            </div>
+            ></div>
           )}
         </li>
       ))}
     </ul>
+    <!-- Vertical title on the right (Big City style); horizontal on phones -->
+    <div class="text-[clamp(1.9rem,9vw,3rem)] md:text-[clamp(4rem,9vh,8rem)] md:w-24 md:ml-6 md:mr-2 relative shrink-0">
+      <h1 class="md:sticky md:top-24 md:rotate-90 md:origin-top-left md:translate-x-full md:whitespace-nowrap font-display">Lookbook</h1>
+    </div>
   </section>
-
-  <style>
-    .lb-filter {
-      border: 1px solid rgb(255 255 255 / 0.35);
-      padding: 0.4rem 0.8rem;
-      border-radius: 999px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-    }
-    .lb-filter:hover { border-color: #fff; }
-    .lb-filter.is-active { background: #fff; color: #000; border-color: #fff; }
-  </style>
-
-  <script>
-    const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(".lb-filter"));
-    const tiles = Array.from(document.querySelectorAll<HTMLElement>(".lb-tile"));
-    buttons.forEach((b) =>
-      b.addEventListener("click", () => {
-        const f = b.dataset.filter;
-        buttons.forEach((x) => x.classList.toggle("is-active", x === b));
-        tiles.forEach((t) => (t.hidden = f !== "all" && t.dataset.source !== f));
-      }),
-    );
-  </script>
 </Layout>
