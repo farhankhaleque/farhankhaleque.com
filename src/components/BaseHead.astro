@@ -1,7 +1,6 @@
 ---
 import { url } from "../consts";
 import "../styles/global.css";
-import robotoCondensed from "../styles/fonts/RobotoCondensed-Regular.woff2?url";
 
 interface Props {
   title: string;
@@ -33,5 +32,6 @@ const { title, description } = Astro.props;
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fugaz+One&display=swap" rel="stylesheet" />
-<link rel="preload" href={robotoCondensed} as="font" type="font/woff2" crossorigin />
+<!-- Free stand-ins for the Adobe Fonts on the Squarespace site:
+     Pragmatica Extended -> Archivo Expanded, Aktiv Grotesk -> Inter, Courier Std -> Courier Prime -->
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700;125,800&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet" />

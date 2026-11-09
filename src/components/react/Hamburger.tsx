@@ -12,7 +12,7 @@ const Hamburger: React.FC = () => {
             : "h-0 opacity-0 pointer-events-none"
         }`}
       >
-        <ul className="my-auto flex flex-col gap-5 text-3xl text-center">
+        <ul className="font-nav my-auto flex flex-col gap-5 text-3xl text-center">
           {Object.entries(URLS).map(([key, value]) => (
             <li key={key}>
               <Link

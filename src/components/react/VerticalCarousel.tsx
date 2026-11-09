@@ -90,9 +90,9 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
                 className="w-full max-w-md aspect-[3/4] max-h-[52vh] md:max-h-none p-5 md:p-8 flex flex-col justify-between text-white select-none"
                 style={{ backgroundColor: p.color }}
               >
-                <p className="text-xs md:text-sm uppercase tracking-[0.2em] opacity-80">{p.place}</p>
+                <p className="font-nav text-xs md:text-sm opacity-80">{p.place}</p>
                 <div>
-                  <p className="font-fugaz text-5xl md:text-8xl leading-none">{p.big}</p>
+                  <p className="font-display text-5xl md:text-8xl leading-none">{p.big}</p>
                   <p className="text-base md:text-xl mt-3 md:mt-4 max-w-64">{p.small}</p>
                 </div>
               </div>

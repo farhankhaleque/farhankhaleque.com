@@ -11,7 +11,7 @@ const year = new Date().getFullYear();
 <footer class="relative bg-muted pt-10 w-full md:pb-6 border-t z-10 max-w-full overflow-hidden">
   <div class="container px-5 mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:pr-[17%]">
     <div class="flex flex-col items-start gap-8 col-span-1">
-      <p class="text-3xl md:text-4xl font-fugaz max-w-md">Want to work together?</p>
+      <p class="text-3xl md:text-4xl font-display max-w-md">Want to work together?</p>
       <Button text="Let's chat" href={url("/contact")} />
     </div>
     <div class="flex flex-col justify-between col-span-1 md:pl-10">
@@ -26,20 +26,20 @@ const year = new Date().getFullYear();
     <hr class="col-span-1 md:col-span-2" />
     <div class="col-span-1 md:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-8 py-4">
       <div>
-        <h2 class="text-sm uppercase tracking-widest mb-2">Menu</h2>
-        <ul class="font-bold space-y-1">
+        <h2 class="font-nav text-xs tracking-widest mb-3 opacity-70">Menu</h2>
+        <ul class="font-nav text-sm space-y-1">
           {URLS.map((u) => <li><a href={u.href}>{u.text}</a></li>)}
         </ul>
       </div>
       <div>
-        <h2 class="text-sm uppercase tracking-widest mb-2">Work</h2>
-        <ul class="font-bold space-y-1">
+        <h2 class="font-nav text-xs tracking-widest mb-3 opacity-70">Work</h2>
+        <ul class="font-nav text-sm space-y-1">
           {work.map((e) => <li><a href={url(`/work/${e.id}/`)}>{e.data.company}</a></li>)}
         </ul>
       </div>
       <div>
-        <h2 class="text-sm uppercase tracking-widest mb-2">Collection</h2>
-        <ul class="font-bold space-y-1">
+        <h2 class="font-nav text-xs tracking-widest mb-3 opacity-70">Collection</h2>
+        <ul class="font-nav text-sm space-y-1">
           {projects.map((e) => <li><a href={url(`/collection/${e.id}/`)}>{e.data.title}</a></li>)}
         </ul>
       </div>

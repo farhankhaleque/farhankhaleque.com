@@ -84,7 +84,7 @@ export default function SearchBar({ items }: Props) {
                   setLoading(false);
                   setIsOpen(false);
                 }}
-                className="cursor-pointer w-10 h-10 font-fugaz text-black"
+                className="cursor-pointer w-10 h-10 font-display text-black"
                 aria-label="Close search bar"
               >
                 <OptimizedIcon name="close" className="w-8 h-8" />

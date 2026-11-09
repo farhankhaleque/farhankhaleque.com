@@ -54,10 +54,10 @@ export default function Navigation() {
             transition={{ duration: 0.4 }}
             className="flex flex-col text-right justify-center gap-10 fixed top-0  right-6 p-10 rounded-l-xl h-screen bg-background"
           >
-            <h1 className="text-4xl font-bold">
+            <p className="text-3xl font-display">
               Farhan <br /> Khaleque
-            </h1>
-            <ul className="text-xl flex flex-col gap-5 z-10">
+            </p>
+            <ul className="font-nav text-lg flex flex-col gap-5 z-10">
               {Object.entries(URLS).map(([key, value]) => (
                 <motion.li
                   key={key}

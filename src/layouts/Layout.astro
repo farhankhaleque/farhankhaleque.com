@@ -21,14 +21,14 @@ const fullTitle = title ? `${title} · ${SITE_TITLE}` : SITE_TITLE;
   <head>
     <BaseHead title={fullTitle} description={description} />
     <style is:inline>
-      body { font-family: "Roboto Condensed", sans-serif; background-color: #f2f2f2; color: #040404; margin: 0; padding: 0; }
+      body { font-family: "Courier Prime", "Courier New", monospace; background-color: #f2f2f2; color: #040404; margin: 0; padding: 0; }
       .container { max-width: 100%; margin: 0 auto; }
     </style>
   </head>
   <body class="flex flex-col items-center min-h-screen relative max-w-screen p-0 m-0">
     <main class="container min-h-screen px-2 flex flex-col gap-10 overflow-hidden mx-auto relative md:pr-[17%]">
       <a href={url("/")} class="absolute top-0 left-0 cursor-pointer z-20" aria-label="Home">
-        <span class="flex h-20 w-20 items-center justify-center font-fugaz text-3xl">FK</span>
+        <span class="flex h-20 w-20 items-center justify-center font-display text-3xl">FK</span>
       </a>
       <slot />
       <DeskMenu />

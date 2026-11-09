@@ -19,7 +19,7 @@ const facts = [
 
 <Layout title="About" description="About Farhan Khaleque: NYU Computer Science, fashion merchandising and product development.">
   <section class="flex flex-col items-center py-10 pb-32 px-4">
-    <h1 class="text-6xl md:text-8xl font-fugaz pt-20 pb-12 max-w-2xl text-center">Know Farhan</h1>
+    <h1 class="text-6xl md:text-8xl font-display pt-20 pb-12 max-w-2xl text-center">Know Farhan</h1>
     <div class="max-w-xl text-xl flex flex-col gap-5">
       <p>I'm studying Computer Science and Middle Eastern Studies at NYU, and I graduate in May 2027.</p>
       <p>Most of what I know about fashion I learned by doing it. I started as a pattern maker at Lusaka Group, then designed for Pull&amp;Bear and spent a lot of time in factories and wash facilities around Bangladesh. At Street Denim I went from checking samples to managing wholesale accounts. This past summer I was on the men's designer shoe team at Bloomingdale's.</p>
@@ -27,7 +27,7 @@ const facts = [
     </div>
 
     <div class="w-full max-w-4xl mt-28">
-      <h2 class="font-fugaz text-4xl md:text-6xl mb-10">Leadership</h2>
+      <h2 class="font-display text-4xl md:text-6xl mb-10">Leadership</h2>
       <ul class="grid md:grid-cols-2 gap-x-12 gap-y-10">
         {leadership.map((l) => (
           <li class="border-t pt-4">
@@ -43,7 +43,7 @@ const facts = [
     <dl class="w-full max-w-4xl mt-28 grid md:grid-cols-2 gap-x-12 gap-y-8">
       {facts.map((f) => (
         <div class="border-t pt-4">
-          <dt class="text-sm uppercase tracking-widest mb-2">{f.label}</dt>
+          <dt class="font-nav text-xs tracking-widest mb-2 opacity-70">{f.label}</dt>
           {f.lines.map((line) => <dd class="text-lg">{line}</dd>)}
         </div>
       ))}
