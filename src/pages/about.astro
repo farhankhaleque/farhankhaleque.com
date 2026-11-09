@@ -23,20 +23,9 @@ const facts = [
   description="Farhan “Aurangzeb” Khaleque is a New York based designer and supply chain specialist whose work bridges fashion, business, and technology."
 >
   <section class="flex flex-col items-center py-10 pb-32 px-4">
-    <div class="w-full max-w-5xl pt-20 grid md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-10 md:gap-14 items-start">
-      <div>
-        <h1 class="font-display text-[clamp(1.5rem,7.5vw,2.75rem)] md:text-[clamp(1.5rem,3.1vw,3.75rem)] pb-10">Sculptor // Sculpture</h1>
-        <div class="text-lg md:text-xl flex flex-col gap-5 max-w-2xl">
-          <p>
-            Farhan “Aurangzeb” Khaleque is a New York based designer and supply chain specialist whose work
-            bridges fashion, business, and technology. His eye for detail comes alive in both the cut of denim
-            and the shape of patterns, treating garments not just as products but as narratives of craft and culture.
-          </p>
-          <p>Fashion is a language, and his work is about making the technical beautiful.</p>
-        </div>
-      </div>
-      <!-- Headshots: frontal and side -->
-      <div class="grid grid-cols-2 gap-3 md:mt-2 order-first md:order-none">
+    <!-- Headshots: frontal and side, on top -->
+    <div class="w-full max-w-5xl pt-20">
+      <div class="grid grid-cols-2 gap-3 md:gap-4 max-w-2xl">
         {headshots.map((h) =>
           h.src ? (
             <img src={url(h.src)} alt={h.label} class="w-full aspect-[3/4] object-cover" />
@@ -47,8 +36,20 @@ const facts = [
       </div>
     </div>
 
+    <div class="w-full max-w-5xl mt-20">
+      <h1 class="font-display text-[clamp(1.5rem,6.2vw,4.5rem)] pb-10">Sculptor // Sculpture</h1>
+      <div class="text-lg md:text-xl flex flex-col gap-5 max-w-2xl">
+        <p>
+          Farhan “Aurangzeb” Khaleque is a New York based designer and supply chain specialist whose work
+          bridges fashion, business, and technology. His eye for detail comes alive in both the cut of denim
+          and the shape of patterns, treating garments not just as products but as narratives of craft and culture.
+        </p>
+        <p>Fashion is a language, and his work is about making the technical beautiful.</p>
+      </div>
+    </div>
+
     <div class="w-full max-w-5xl mt-24">
-      <h2 class="font-display text-[clamp(1.5rem,7.5vw,2.75rem)] md:text-[clamp(1.5rem,3.1vw,3.75rem)] pb-10">Design Principles</h2>
+      <h2 class="font-display text-[clamp(1.5rem,6.2vw,4.5rem)] pb-10">Design Principles</h2>
       <div class="text-lg md:text-xl flex flex-col gap-5 max-w-2xl">
         <p>
           Aurangzeb brings a streetwear perspective to contemporary fashion, blending global trends with the
