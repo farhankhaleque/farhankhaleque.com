@@ -11,6 +11,7 @@ import react from "@astrojs/react";
 export default defineConfig({
   site: "https://www.farhankhaleque.com",
   output: 'static',
+  build: { assets: 'assets' },
   integrations: [mdx(), sitemap(), icon(), react()],
   vite: {
     plugins: [tailwindcss()],
