@@ -9,7 +9,7 @@ group: "leadership"
 stat: "12"
 statLabel: "garments designed, patterned, and constructed for the NYU runway show"
 summary: "12 garments for the NYU runway show"
-color: "#5b2a4e"
+color: "#454545"
 ---
 
 - Designed, patterned, and constructed 12 garments for the NYU runway show, running fittings with models over 3 months

@@ -8,9 +8,13 @@ const experience = defineCollection({
     company: z.string(),
     role: z.string(),
     dates: z.string(), // shown as written, e.g. "Jun to Jul 2026"
-    location: z.string(),
+    location: z.string().optional(),
     start: z.string(), // "YYYY-MM", used for ordering and the timeline
-    end: z.string(), // "YYYY-MM"
+    end: z.string(), // "YYYY-MM", or "present" if ongoing
+    // Optional: pin this role to a row at the top of the timeline (1 = top)
+    timelineRow: z.number().optional(),
+    // Optional: put this role first or last in the list of role slides
+    listPosition: z.enum(["first", "last"]).optional(),
     // Optional: separate stretches of time in the same role (shown as gaps on the timeline)
     periods: z.array(z.object({ start: z.string(), end: z.string() })).optional(),
     // "experience" = jobs, "leadership" = clubs and student roles
@@ -18,23 +22,8 @@ const experience = defineCollection({
     stat: z.string(), // the big headline number on the Experience page
     statLabel: z.string(),
     summary: z.string(),
-    color: z.string().default("#a52a2a"),
+    color: z.string().default("#3a3a3a"),
   }),
 });
 
-// One Markdown file per project in src/content/lookbook/
-const lookbook = defineCollection({
-  loader: glob({ base: "./src/content/lookbook", pattern: "**/*.{md,mdx}" }),
-  schema: z.object({
-    title: z.string(),
-    kicker: z.string(),
-    description: z.string(),
-    order: z.number(),
-    tags: z.array(z.string()).default([]),
-    // Optional photo in public/lookbook/, e.g. "/lookbook/aurangzeb-1.jpg"
-    image: z.string().optional(),
-    color: z.string().default("#040404"),
-  }),
-});
-
-export const collections = { experience, lookbook };
+export const collections = { experience };

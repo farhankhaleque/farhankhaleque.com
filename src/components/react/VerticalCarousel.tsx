@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, useAnimationFrame, useMotionValue } from "framer-motion";
-import type { Panel } from "@/data/lookbook";
+import type { Panel } from "@/data/home";
 import { url } from "@/consts";
 
 interface VerticalCarouselProps {

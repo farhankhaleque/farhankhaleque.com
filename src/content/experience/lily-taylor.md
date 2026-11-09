@@ -8,7 +8,7 @@ end: "2025-12"
 stat: "300+"
 statLabel: "styles live on a Shopify store I built from scratch"
 summary: "Built the Shopify store from scratch and took 300+ styles live"
-color: "#7d6450"
+color: "#353535"
 ---
 
 - Independently built the brand's Shopify store from scratch and took 300+ styles live with product copy, imagery, SKUs, sizes, and attributes

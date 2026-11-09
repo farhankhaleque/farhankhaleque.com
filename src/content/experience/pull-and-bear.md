@@ -8,7 +8,7 @@ end: "2024-08"
 stat: "900K"
 statLabel: "units from 72 styles I designed"
 summary: "72 styles into production, about 900K units"
-color: "#a52a2a"
+color: "#5a5a5a"
 ---
 
 - Designed 72 men's and women's styles that went into production, about 900K units, across outerwear, jackets, shirts, jeans, sweatpants, and skirts

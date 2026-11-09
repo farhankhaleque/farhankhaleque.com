@@ -1,50 +1,77 @@
 ---
-import { url } from "@/consts";
-import { getLookbook } from "@/lib/experience";
 import Layout from "@/layouts/Layout.astro";
-const projects = await getLookbook();
-const [featured, ...rest] = projects;
+import { PHOTOS, SOURCES } from "@/data/gallery";
+import { url } from "@/consts";
+
+const counts = new Map<string, number>();
+const tiles = PHOTOS.map((p) => {
+  const n = (counts.get(p.source) ?? 0) + 1;
+  counts.set(p.source, n);
+  return { ...p, n };
+});
+const sources = SOURCES.filter((s) => counts.has(s));
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+const pad = (n: number) => String(n).padStart(2, "0");
 ---
 
-<Layout title="Lookbook" description="Projects by Farhan Khaleque: Aurangzeb, a runway collection, a product content tool, and more.">
-  <section class="md:px-6 flex md:flex-row flex-col-reverse w-full gap-6 pt-24 md:pt-24">
-    <div class="grid md:grid-cols-2 gap-6 md:gap-x-8 md:mb-32 flex-1">
-      <!-- Featured project (Big City's "Destacado") -->
-      <a href={url(`/lookbook/${featured.id}/`)} class="relative flex min-h-[70vh] md:min-h-[85vh] w-full text-white group overflow-hidden" style={`background-color:${featured.data.color}`}>
-        {featured.data.image && (
-          <img src={url(featured.data.image)} alt={featured.data.title} class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition duration-700" />
-        )}
-        <div class="absolute bottom-10 left-6 right-6 flex flex-col gap-3">
-          <p class="font-nav text-sm opacity-80">{featured.data.kicker}</p>
-          <p class="font-display text-[clamp(1.6rem,9vw,2.25rem)] md:text-[clamp(1.1rem,calc(3.4vw-6px),4.5rem)] leading-none">{featured.data.title}</p>
-          <p class="text-2xl max-w-sm">{featured.data.description}</p>
-          <p class="mt-2 underline underline-offset-4">See the project</p>
-        </div>
-      </a>
-      <!-- Other projects (Big City's "CardLanding") -->
-      <ul class="flex flex-col gap-8 py-2">
-        {rest.map((p) => (
-          <li>
-            <a href={url(`/lookbook/${p.id}/`)} class="grid grid-cols-2 gap-4 items-start group">
-              {p.data.image ? (
-                <img src={url(p.data.image)} alt={p.data.title} class="miniature object-cover w-full" loading="lazy" />
-              ) : (
-                <div class="miniature w-full flex items-end p-3 text-white group-hover:-translate-y-1 transition" style={`background-color:${p.data.color}`}>
-                  <span class="font-display text-xl leading-tight">{p.data.title}</span>
-                </div>
-              )}
-              <div class="flex flex-col gap-1">
-                <p class="text-sm">{p.data.kicker}</p>
-                <p class="font-bold text-xl leading-snug">{p.data.title}</p>
-                <p>{p.data.description}</p>
-              </div>
-            </a>
-          </li>
-        ))}
-      </ul>
+<Layout title="Lookbook" description="Lookbook: photos of Farhan Khaleque's work across Aurangzeb, runway shows, Pull&Bear, Street Denim, and more.">
+  <section class="w-full max-w-[1200px] self-center px-4 md:px-8 pt-24 md:pt-28 pb-24">
+    <h1 class="text-[clamp(1.9rem,8.2vw,6rem)] font-display">Lookbook</h1>
+    <p class="text-lg md:text-xl max-w-2xl mt-6">Work from across my experience.</p>
+
+    <div class="flex flex-wrap gap-2 mt-10 mb-10 font-nav text-xs" role="group" aria-label="Filter by experience">
+      <button type="button" class="lb-filter is-active" data-filter="all">All</button>
+      {sources.map((s) => (
+        <button type="button" class="lb-filter" data-filter={slug(s)}>{s}</button>
+      ))}
     </div>
-    <div class="text-[clamp(1.9rem,9vw,3rem)] md:text-[clamp(4rem,9vh,8rem)] md:w-24 relative md:mr-6 px-4 md:px-0">
-      <h1 class="md:rotate-90 md:origin-top-left md:translate-x-full md:mt-10 md:whitespace-nowrap font-display">Lookbook</h1>
-    </div>
+
+    <ul class="columns-2 md:columns-3 gap-3 md:gap-4">
+      {tiles.map((t) => (
+        <li class="lb-tile break-inside-avoid mb-3 md:mb-4" data-source={slug(t.source)}>
+          {t.src ? (
+            <figure>
+              <img src={url(t.src)} alt={t.alt ?? t.source} loading="lazy" class="w-full block" />
+              <figcaption class="font-nav text-[11px] mt-2 opacity-70">{t.source}</figcaption>
+            </figure>
+          ) : (
+            <div
+              class="w-full bg-neutral-800 border border-white/10 flex flex-col justify-between p-3 md:p-4"
+              style={`aspect-ratio:${t.ratio ?? "3/4"}`}
+              role="img"
+              aria-label={`${t.source}, photo ${t.n} (placeholder)`}
+            >
+              <span class="font-nav text-[10px] md:text-[11px] opacity-50">{pad(t.n)}</span>
+              <span class="font-nav text-[11px] md:text-xs opacity-80">{t.source}</span>
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
   </section>
+
+  <style>
+    .lb-filter {
+      border: 1px solid rgb(255 255 255 / 0.35);
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .lb-filter:hover { border-color: #fff; }
+    .lb-filter.is-active { background: #fff; color: #000; border-color: #fff; }
+  </style>
+
+  <script>
+    const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(".lb-filter"));
+    const tiles = Array.from(document.querySelectorAll<HTMLElement>(".lb-tile"));
+    buttons.forEach((b) =>
+      b.addEventListener("click", () => {
+        const f = b.dataset.filter;
+        buttons.forEach((x) => x.classList.toggle("is-active", x === b));
+        tiles.forEach((t) => (t.hidden = f !== "all" && t.dataset.source !== f));
+      }),
+    );
+  </script>
 </Layout>

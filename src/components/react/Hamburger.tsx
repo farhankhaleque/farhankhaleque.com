@@ -4,11 +4,11 @@ import { URLS, SOCIAL_LINKS, SITE_AUTHOR, url } from "@/consts";
 const Hamburger: React.FC = () => {
   const [isOpen, setOpen] = useState(false);
   return (
-    <div className="fixed bottom-0  z-50 max-w-screen left-0 w-full bg-white border-t flex flex-col md:hidden transition-all duration-500 ease-in-out">
+    <div className="fixed bottom-0  z-50 max-w-screen left-0 w-full bg-background border-t border-white/20 flex flex-col md:hidden transition-all duration-500 ease-in-out">
       <nav
         className={`flex flex-col items-center  w-full overflow-hidden transition-all duration-500 ease-in-out ${
           isOpen
-            ? "h-dvh opacity-100 bg-white  sticky"
+            ? "h-dvh opacity-100 bg-background  sticky"
             : "h-0 opacity-0 pointer-events-none"
         }`}
       >
@@ -26,10 +26,10 @@ const Hamburger: React.FC = () => {
         </ul>
         <div className="flex pb-5">
           <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-            <img src={url("/icons/linkedin.svg")} alt="LinkedIn" className="w-9 h-9 mx-3 transition-transform duration-300 hover:scale-110" />
+            <img src={url("/icons/linkedin.svg")} alt="LinkedIn" className="w-9 h-9 mx-3 invert transition-transform duration-300 hover:scale-110" />
           </a>
           <a href={SOCIAL_LINKS.email} aria-label="Email">
-            <img src={url("/icons/mail.svg")} alt="Email" className="w-9 h-9 mx-3 transition-transform duration-300 hover:scale-110" />
+            <img src={url("/icons/mail.svg")} alt="Email" className="w-9 h-9 mx-3 invert transition-transform duration-300 hover:scale-110" />
           </a>
         </div>
       </nav>

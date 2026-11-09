@@ -1,14 +1,13 @@
 ---
 import Button from "./Button.astro";
-import { getExperience, getLookbook } from "@/lib/experience";
+import { getExperienceList } from "@/lib/experience";
 import { SITE_AUTHOR, SITE_EMAIL, SOCIAL_LINKS, URLS, url } from "@/consts";
 
-const work = await getExperience();
-const projects = await getLookbook();
+const work = await getExperienceList();
 const year = new Date().getFullYear();
 ---
 
-<footer class="relative bg-muted pt-10 w-full md:pb-6 border-t z-10 max-w-full overflow-hidden">
+<footer class="relative bg-muted pt-10 w-full md:pb-6 border-t border-white/20 z-10 max-w-full overflow-hidden">
   <div class="container px-5 mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:pr-[17%]">
     <div class="flex flex-col items-start gap-8 col-span-1">
       <p class="text-3xl md:text-4xl font-display max-w-md">Want to work together?</p>
@@ -23,8 +22,8 @@ const year = new Date().getFullYear();
         <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener" class="underline underline-offset-4">LinkedIn</a>
       </div>
     </div>
-    <hr class="col-span-1 md:col-span-2" />
-    <div class="col-span-1 md:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-8 py-4">
+    <hr class="col-span-1 md:col-span-2 border-white/20" />
+    <div class="col-span-1 md:col-span-2 grid grid-cols-2 gap-8 py-4">
       <div>
         <h2 class="font-nav text-xs tracking-widest mb-3 opacity-70">Menu</h2>
         <ul class="font-nav text-sm space-y-1">
@@ -37,14 +36,8 @@ const year = new Date().getFullYear();
           {work.map((e) => <li><a href={url(`/experience/${e.id}/`)}>{e.data.company}</a></li>)}
         </ul>
       </div>
-      <div>
-        <h2 class="font-nav text-xs tracking-widest mb-3 opacity-70">Lookbook</h2>
-        <ul class="font-nav text-sm space-y-1">
-          {projects.map((e) => <li><a href={url(`/lookbook/${e.id}/`)}>{e.data.title}</a></li>)}
-        </ul>
-      </div>
     </div>
-    <hr class="col-span-1 md:col-span-2" />
+    <hr class="col-span-1 md:col-span-2 border-white/20" />
     <p class="col-span-1 md:col-span-2 text-center pb-24 md:pb-6 text-sm">© {year} {SITE_AUTHOR} · New York</p>
   </div>
 </footer>

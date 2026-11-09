@@ -48,7 +48,7 @@ export default function SearchBar({ items }: Props) {
   return (
     <div ref={containerRef} className="relative">
       <button
-        className="cursor-pointer text-black"
+        className="cursor-pointer text-white"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Open search bar"
         aria-expanded={isOpen}
@@ -63,7 +63,7 @@ export default function SearchBar({ items }: Props) {
           exit={{ opacity: 0, x: -10 }}
           transition={{ duration: 0.2}}
         >
-          <div className="w-72 p-3 rounded-lg bg-white shadow-lg flex flex-col gap-3">
+          <div className="w-72 p-3 rounded-lg bg-muted border border-white/20 shadow-lg flex flex-col gap-3">
             <div className="flex flex-row items-center gap-3">
               <input
                 type="text"
@@ -73,7 +73,7 @@ export default function SearchBar({ items }: Props) {
                   setSearch(e.target.value);
                   setTouched(true);
                 }}
-                className="w-full h-10 px-3 outline-none border-b"
+                className="w-full h-10 px-3 outline-none border-b border-white/30 bg-transparent text-white placeholder:text-white/50"
                 autoFocus
               />
               <button
@@ -84,7 +84,7 @@ export default function SearchBar({ items }: Props) {
                   setLoading(false);
                   setIsOpen(false);
                 }}
-                className="cursor-pointer w-10 h-10 font-display text-black"
+                className="cursor-pointer w-10 h-10 text-white"
                 aria-label="Close search bar"
               >
                 <OptimizedIcon name="close" className="w-8 h-8" />
@@ -92,20 +92,20 @@ export default function SearchBar({ items }: Props) {
             </div>
             <div className="max-h-72 overflow-y-auto bg-muted">
               {loading && (
-                <div className="p-3 text-sm text-gray-500">Searching...</div>
+                <div className="p-3 text-sm text-white/60">Searching...</div>
               )}
               {!loading && touched && search.trim() === "" && (
-                <div className="p-3 text-sm text-gray-500">Write to search</div>
+                <div className="p-3 text-sm text-white/60">Write to search</div>
               )}
               {!loading && search.trim() !== "" && results.length === 0 && (
-                <div className="p-3 text-sm text-gray-500">No results</div>
+                <div className="p-3 text-sm text-white/60">No results</div>
               )}
-              <ul className="divide-y">
+              <ul className="divide-y divide-white/15">
                 {results.map((r) => (
-                  <li key={r.url} className="hover:bg-gray-50">
+                  <li key={r.url} className="hover:bg-white/10">
                     <a href={r.url} className="block px-3 py-2">
                       <span className="text-sm font-medium">{r.title}</span>
-                      <span className="ml-2 text-xs text-gray-500">
+                      <span className="ml-2 text-xs text-white/60">
                         {r.collection}
                       </span>
                     </a>
