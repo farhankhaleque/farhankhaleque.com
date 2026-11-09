@@ -25,6 +25,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          # Temporary GitHub Pages address. When www.farhankhaleque.com is
+          # connected, delete these two lines so the site builds for "/".
+          SITE_URL: https://farhankhaleque.github.io
+          BASE_PATH: /farhankhaleque.com
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

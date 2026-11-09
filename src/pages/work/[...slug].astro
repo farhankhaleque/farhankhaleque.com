@@ -1,4 +1,5 @@
 ---
+import { url } from "@/consts";
 import { getCollection, render } from "astro:content";
 import Entry from "@/layouts/Entry.astro";
 
@@ -20,8 +21,8 @@ const d = entry.data;
   meta={[d.dates, d.location]}
   color={d.color}
   description={`${d.role} at ${d.company}. ${d.summary}.`}
-  back={{ href: "/work", text: "All work" }}
-  next={{ href: `/work/${next.id}/`, text: `Next: ${next.data.company}` }}
+  back={{ href: url("/work/"), text: "All work" }}
+  next={{ href: url(`/work/${next.id}/`), text: `Next: ${next.data.company}` }}
 >
   <Content />
 </Entry>

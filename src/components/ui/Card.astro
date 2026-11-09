@@ -1,4 +1,5 @@
 ---
+import { url } from "@/consts";
 // Staggered card from the Big City blog grid, used for work entries.
 interface Props {
   entry: any;
@@ -10,7 +11,7 @@ const d = entry.data;
 ---
 
 <li class={`${offsets[index % offsets.length]} relative`}>
-  <a href={`/work/${entry.id}/`} class="group relative flex flex-col gap-3 p-6 pr-10 max-w-96">
+  <a href={url(`/work/${entry.id}/`)} class="group relative flex flex-col gap-3 p-6 pr-10 max-w-96">
     <div
       class="miniature w-full flex items-end p-5 text-white transition-transform duration-500 ease-fluid group-hover:-translate-y-2"
       style={`background-color:${d.color}`}

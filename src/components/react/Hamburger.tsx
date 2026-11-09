@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { URLS, SOCIAL_LINKS, SITE_AUTHOR } from "@/consts";
+import { URLS, SOCIAL_LINKS, SITE_AUTHOR, url } from "@/consts";
 
 const Hamburger: React.FC = () => {
   const [isOpen, setOpen] = useState(false);
@@ -26,10 +26,10 @@ const Hamburger: React.FC = () => {
         </ul>
         <div className="flex pb-5">
           <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-            <img src="/icons/linkedin.svg" alt="LinkedIn" className="w-9 h-9 mx-3 transition-transform duration-300 hover:scale-110" />
+            <img src={url("/icons/linkedin.svg")} alt="LinkedIn" className="w-9 h-9 mx-3 transition-transform duration-300 hover:scale-110" />
           </a>
           <a href={SOCIAL_LINKS.email} aria-label="Email">
-            <img src="/icons/mail.svg" alt="Email" className="w-9 h-9 mx-3 transition-transform duration-300 hover:scale-110" />
+            <img src={url("/icons/mail.svg")} alt="Email" className="w-9 h-9 mx-3 transition-transform duration-300 hover:scale-110" />
           </a>
         </div>
       </nav>
@@ -105,7 +105,7 @@ const Link: React.FC<{
 }> = ({ href, target, rel, text }) => {
   // Verificar si la URL actual coincide con el href
   const isCurrent =
-    typeof window !== "undefined" && window.location.pathname === href;
+    typeof window !== "undefined" && window.location.pathname.replace(/\/$/, "") === href.replace(/\/$/, "");
 
   return (
     <a

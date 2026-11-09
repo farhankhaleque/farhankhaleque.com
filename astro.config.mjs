@@ -9,7 +9,8 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
 
 export default defineConfig({
-  site: "https://www.farhankhaleque.com",
+  site: process.env.SITE_URL || "https://www.farhankhaleque.com",
+  base: process.env.BASE_PATH || "/",
   output: 'static',
   build: { assets: 'assets' },
   integrations: [mdx(), sitemap(), icon(), react()],

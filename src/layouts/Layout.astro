@@ -1,4 +1,5 @@
 ---
+import { url } from "@/consts";
 import "@/styles/global.css";
 import BaseHead from "../components/BaseHead.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
@@ -26,7 +27,7 @@ const fullTitle = title ? `${title} · ${SITE_TITLE}` : SITE_TITLE;
   </head>
   <body class="flex flex-col items-center min-h-screen relative max-w-screen p-0 m-0">
     <main class="container min-h-screen px-2 flex flex-col gap-10 overflow-hidden mx-auto relative md:pr-[17%]">
-      <a href="/" class="absolute top-0 left-0 cursor-pointer z-20" aria-label="Home">
+      <a href={url("/")} class="absolute top-0 left-0 cursor-pointer z-20" aria-label="Home">
         <span class="flex h-20 w-20 items-center justify-center font-fugaz text-3xl">FK</span>
       </a>
       <slot />

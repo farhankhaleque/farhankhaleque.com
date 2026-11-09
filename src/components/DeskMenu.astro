@@ -3,7 +3,7 @@ import { Icon } from "astro-icon/components";
 import DeskNav from "@/components/react/DeskNav";
 import SearchBar from "@/components/react/SearchBar";
 import { getCollection } from "astro:content";
-import { SOCIAL_LINKS, SITE_LOCATION } from "@/consts";
+import { SOCIAL_LINKS, SITE_LOCATION, url } from "@/consts";
 
 const [workEntries, collectionEntries] = await Promise.all([
   getCollection("work"),
@@ -11,8 +11,8 @@ const [workEntries, collectionEntries] = await Promise.all([
 ]);
 
 const searchItems = [
-  ...workEntries.map((p) => ({ title: `${p.data.company}, ${p.data.role}`, url: `/work/${p.id}/`, collection: "work" })),
-  ...collectionEntries.map((p) => ({ title: p.data.title, url: `/collection/${p.id}/`, collection: "collection" })),
+  ...workEntries.map((p) => ({ title: `${p.data.company}, ${p.data.role}`, url: url(`/work/${p.id}/`), collection: "work" })),
+  ...collectionEntries.map((p) => ({ title: p.data.title, url: url(`/collection/${p.id}/`), collection: "collection" })),
 ];
 ---
 

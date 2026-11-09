@@ -13,10 +13,16 @@ export const SOCIAL_LINKS = {
   email: `mailto:${SITE_EMAIL}`,
 };
 
+// Prefix site paths with the deploy base ("/" normally, "/farhankhaleque.com"
+// while the site is served from the temporary GitHub Pages address).
+export const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+export const url = (path: string) =>
+  /^(https?:|mailto:)/.test(path) ? path : `${BASE}${path}`;
+
 export const URLS = [
-  { href: "/", text: "Home" },
-  { href: "/work", text: "Work" },
-  { href: "/collection", text: "Collection" },
-  { href: "/about", text: "About" },
-  { href: "/contact", text: "Contact" },
+  { href: url("/"), text: "Home" },
+  { href: url("/work"), text: "Work" },
+  { href: url("/collection"), text: "Collection" },
+  { href: url("/about"), text: "About" },
+  { href: url("/contact"), text: "Contact" },
 ];

@@ -1,4 +1,5 @@
 ---
+import { url } from "@/consts";
 import Layout from "@/layouts/Layout.astro";
 ---
 <Layout title="Not found" footer={false}>
@@ -6,6 +7,6 @@ import Layout from "@/layouts/Layout.astro";
     <div class="flex items-end text-9xl font-fugaz">
       <p>404</p>
     </div>
-    <p class="text-xl">This page doesn't exist. <a href="/" class="underline">Head home</a>.</p>
+    <p class="text-xl">This page doesn't exist. <a href={url("/")} class="underline">Head home</a>.</p>
   </div>
 </Layout>

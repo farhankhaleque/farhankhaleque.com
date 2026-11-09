@@ -1,4 +1,5 @@
 ---
+import { url } from "@/consts";
 import { getCollection, render } from "astro:content";
 import Entry from "@/layouts/Entry.astro";
 
@@ -19,11 +20,11 @@ const d = entry.data;
   subtitle={d.description}
   meta={[d.kicker]}
   color={d.color}
-  image={d.image}
+  image={d.image && url(d.image)}
   tags={d.tags}
   description={`${d.title}: ${d.description}`}
-  back={{ href: "/collection", text: "Collection" }}
-  next={{ href: `/collection/${next.id}/`, text: `Next: ${next.data.title}` }}
+  back={{ href: url("/collection/"), text: "Collection" }}
+  next={{ href: url(`/collection/${next.id}/`), text: `Next: ${next.data.title}` }}
 >
   <Content />
 </Entry>

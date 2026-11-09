@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { URLS } from "@/consts";
+import { URLS, url } from "@/consts";
 import OptimizedIcon from "../OptimizedIcon";
 
 export default function Navigation() {
   const [isOpen, setOpen] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.pathname === "/") {
+    if (typeof window !== "undefined" && window.location.pathname.replace(/\/$/, "") === url("/").replace(/\/$/, "")) {
       setOpen(true);
     }
   }, []);
@@ -89,7 +89,7 @@ const Link: React.FC<{
   text: string;
 }> = ({ href, target, rel, text }) => {
   const isCurrent =
-    typeof window !== "undefined" && window.location.pathname === href;
+    typeof window !== "undefined" && window.location.pathname.replace(/\/$/, "") === href.replace(/\/$/, "");
 
   return (
     <motion.a

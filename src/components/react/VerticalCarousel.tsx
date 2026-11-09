@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, useAnimationFrame, useMotionValue } from "framer-motion";
 import type { Panel } from "@/data/lookbook";
+import { url } from "@/consts";
 
 interface VerticalCarouselProps {
   panels: Panel[];
@@ -77,7 +78,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
           >
             {p.type === "image" ? (
               <img
-                src={p.src}
+                src={url(p.src)}
                 alt={p.alt}
                 loading={i === 0 ? "eager" : "lazy"}
                 decoding="async"
