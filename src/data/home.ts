@@ -1,17 +1,16 @@
-// Panels for the scrolling column on the home page.
-// To add a photo: put the file in public/lookbook/ and add
-//   { type: "image", src: "/lookbook/your-photo.jpg", alt: "What it shows" }
-// anywhere in this list.
+// Photos for the scrolling column on the home page (files in public/home/).
+// To add one: put the file in public/home/ and add an entry below.
 
 export type Panel =
-  | { type: "image"; src: string; alt: string }
+  | { type: "image"; src: string; alt: string; width?: number; height?: number }
   | { type: "text"; big: string; small: string; place: string; color: string };
 
 export const PANELS: Panel[] = [
-  { type: "text", big: "900K", small: "units from 72 styles I designed", place: "Pull&Bear · Dhaka", color: "#5a5a5a" },
-  { type: "text", big: "$100M+", small: "men's designer shoe business, 97 vendors", place: "Bloomingdale's · New York", color: "#2e2e2e" },
-  { type: "text", big: "300+", small: "styles live on a Shopify store I built from scratch", place: "Lily&Taylor · New York", color: "#353535" },
-  { type: "text", big: "50", small: "production patterns for Karl Lagerfeld, Givenchy Baby, and Zara", place: "Lusaka Group · Dhaka", color: "#3a3a3a" },
-  { type: "text", big: "$22K", small: "across 4 drops of my own streetwear label", place: "Aurangzeb", color: "#1e1e1e" },
-  { type: "text", big: "170K+", small: "YouTube subscribers and a Silver Play Button", place: "YouTube", color: "#454545" },
+  { type: "image", src: "/home/mg-2502.jpg", alt: "Model in an oversized black leather jacket", width: 1200, height: 1600 },
+  { type: "image", src: "/home/mg-2693.jpg", alt: "Model in a cropped sage green jacket", width: 1200, height: 1600 },
+  { type: "image", src: "/home/mg-2780.jpg", alt: "Four models standing together in a studio", width: 1200, height: 1600 },
+  { type: "image", src: "/home/mg-2799.jpg", alt: "Two models in washed denim", width: 1200, height: 1600 },
+  { type: "image", src: "/home/img-0447.jpg", alt: "Model seated on a leather sofa in an olive jacket", width: 1067, height: 1600 },
+  { type: "image", src: "/home/img-0485.jpg", alt: "Close up of a model in a washed gray denim jacket", width: 1067, height: 1600 },
+  { type: "image", src: "/home/img-0594.jpg", alt: "Black jacket with embroidered calligraphy", width: 1067, height: 1600 },
 ];

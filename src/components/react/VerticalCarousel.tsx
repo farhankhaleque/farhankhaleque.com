@@ -79,11 +79,13 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
             {p.type === "image" ? (
               <img
                 src={url(p.src)}
-                alt={p.alt}
-                loading={i === 0 ? "eager" : "lazy"}
+                alt={i >= panels.length ? "" : p.alt}
+                width={p.width}
+                height={p.height}
+                loading={i < 2 ? "eager" : "lazy"}
                 decoding="async"
                 draggable={false}
-                className="object-contain max-h-[65vh] md:max-h-[80vh] max-w-full"
+                className="w-auto h-auto object-contain max-h-[52vh] md:max-h-[80vh] max-w-full"
               />
             ) : (
               <div
