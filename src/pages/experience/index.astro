@@ -286,6 +286,8 @@ const groups = [
     .exp-play { width: 0; height: 0; border-left: 8px solid #000; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
     .exp-media:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
     .video-dialog {
+      /* centered in the viewport (the site's CSS reset removes the browser's default centering) */
+      position: fixed; inset: 0; margin: auto; width: fit-content; height: fit-content;
       background: #000; border: 1px solid rgb(255 255 255 / 0.2); padding: 0; max-width: min(92vw, 1200px);
       max-height: 90vh; color: #fff; overflow: visible;
     }
