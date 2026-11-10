@@ -74,7 +74,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
           <div
             key={i}
             aria-hidden={i >= panels.length}
-            className="h-full md:h-auto px-3 md:px-0 md:py-5 flex justify-center w-[72vw] md:w-full"
+            className="h-full md:h-auto px-6 md:px-0 md:py-14 flex justify-center w-[72vw] md:w-full"
           >
             {p.type === "image" ? (
               <img
