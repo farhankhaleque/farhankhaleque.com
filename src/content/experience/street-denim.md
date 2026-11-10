@@ -12,6 +12,7 @@ stat: "$132K"
 statLabel: "in wholesale contracts with Ross, TJ Maxx, Burlington, and Macy's Backstage"
 summary: "Wholesale accounts with Ross, TJ Maxx, Burlington, and Macy's Backstage"
 color: "#4a4a4a"
+image: "/experience/street-denim.jpg"
 ---
 
 - Managed $132K in wholesale contracts with Ross, TJ Maxx, Burlington, and Macy's Backstage, communicating with each account on deliveries, price changes, and cancellations

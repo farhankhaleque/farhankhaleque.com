@@ -9,6 +9,8 @@ stat: "900K"
 statLabel: "units from 72 styles I designed"
 summary: "72 styles into production, about 900K units"
 color: "#5a5a5a"
+image: "/experience/pull-and-bear.jpg"
+video: "/experience/video/pull-and-bear.mp4"
 ---
 
 - Designed 72 men's and women's styles that went into production, about 900K units, across outerwear, jackets, shirts, jeans, sweatpants, and skirts

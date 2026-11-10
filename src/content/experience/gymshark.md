@@ -9,6 +9,7 @@ stat: "$3K/hr"
 statLabel: "peak point of sale volume I helped run"
 summary: "Inventory, returns, and replenishment with the U.K. team"
 color: "#404040"
+image: "/experience/gymshark.jpg"
 ---
 
 - Reconciled distribution center returns and stock transfers in SAP and Shopify with the U.K. team to keep inventory accurate

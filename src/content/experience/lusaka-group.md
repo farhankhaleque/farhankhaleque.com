@@ -9,6 +9,7 @@ stat: "50"
 statLabel: "production patterns for Karl Lagerfeld, Givenchy Baby, Zara, and more"
 summary: "Production patterns for Karl Lagerfeld, Givenchy Baby, and Zara"
 color: "#3a3a3a"
+image: "/experience/lusaka-group.jpg"
 ---
 
 - Made and cut about 50 production patterns, mainly knits, for Macy's private brands, Karl Lagerfeld, Givenchy Baby, Ascot Sport, and Zara

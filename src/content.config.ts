@@ -23,6 +23,13 @@ const experience = defineCollection({
     statLabel: z.string(),
     summary: z.string(),
     color: z.string().default("#3a3a3a"),
+    // Square picture shown on the right of the role (file in public/experience/)
+    image: z.string().optional(),
+    // Optional: clicking the picture plays this video (file in public/experience/video/)
+    video: z.string().optional(),
+    // Optional: clicking the picture opens this link instead
+    link: z.string().optional(),
+    linkLabel: z.string().optional(),
   }),
 });
 

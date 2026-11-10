@@ -44,24 +44,21 @@ const highlights = roles.map((r) =>
     .slice(0, 3),
 );
 const pad = (n: number) => String(n).padStart(2, "0");
-// Slide order: pinned-first role, roles by date, the Present (leadership) slide,
-// then pinned-last roles, so Aurangzeb closes the walkthrough.
+// Slide order: pinned-first role (BGMEA), roles by date, pinned-last role
+// (Aurangzeb), then the Present (leadership) slide at the end.
 type Slide = { kind: "role"; r: (typeof roles)[number]; bullets: string[] } | { kind: "present" };
-const tail = roles.filter((r) => r.data.listPosition === "last");
 const slides: Slide[] = [
-  ...roles.filter((r) => r.data.listPosition !== "last").map((r) => ({ kind: "role" as const, r, bullets: highlights[roles.indexOf(r)] })),
+  ...roles.map((r, i) => ({ kind: "role" as const, r, bullets: highlights[i] })),
   { kind: "present" as const },
-  ...tail.map((r) => ({ kind: "role" as const, r, bullets: highlights[roles.indexOf(r)] })),
 ];
 const total = slides.length;
 const slideId = (s: Slide) => (s.kind === "present" ? "present" : s.r.id);
 const slideName = (s: Slide) => (s.kind === "present" ? "Present" : s.r.data.company);
-const nameSize = (name: string) => {
-  const longest = Math.max(...name.split(" ").map((w) => w.length));
-  if (longest <= 7) return "text-5xl md:text-6xl";
-  if (longest <= 9) return "text-4xl md:text-5xl";
-  if (longest <= 11) return "text-3xl md:text-4xl";
-  return "text-2xl md:text-3xl";
+// Display text sized to its box: the longest word always fits the container width
+// (the box sets container-type: inline-size, so 100cqw is its inner width).
+const fit = (text: string, max: string) => {
+  const longest = Math.max(...text.split(" ").map((w) => w.length));
+  return `font-size:min(${max}, calc(100cqw / ${(longest * 0.95).toFixed(2)}))`;
 };
 const [featured, ...others] = [
   ...CURRENT_ROLES.filter((c) => c.featured),
@@ -178,11 +175,11 @@ const groups = [
         return (
           <li id="present" class="role-slide min-h-screen flex items-center border-t border-white/15 py-16 md:py-10">
             <div class="w-full max-w-[1100px] mx-auto px-4 md:px-8 grid md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] gap-8 md:gap-14 items-center">
-              <div class="aspect-[4/3] md:aspect-[4/5] max-h-[78vh] w-full flex flex-col justify-between p-6 md:p-8 text-black bg-white">
+              <div class="fit-box aspect-[4/3] md:aspect-[4/5] max-h-[78vh] w-full flex flex-col justify-between p-6 md:p-8 text-black bg-white">
                 <p class="font-nav text-xs md:text-sm opacity-80">{pad(i + 1)} / {pad(total)} · Leadership</p>
                 <div>
                   <p class="font-nav text-sm md:text-base opacity-90 mb-3">Now</p>
-                  <h2 class="font-display text-5xl md:text-6xl">Present</h2>
+                  <h2 class="font-display" style={fit("Present", "3.75rem")}>Present</h2>
                 </div>
               </div>
               <div>
@@ -207,23 +204,23 @@ const groups = [
       const r = s.r;
       return (
         <li id={r.id} class="role-slide min-h-screen flex items-center border-t border-white/15 py-16 md:py-10">
-          <div class="w-full max-w-[1100px] mx-auto px-4 md:px-8 grid md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] gap-8 md:gap-14 items-center">
+          <div class="w-full max-w-[1400px] mx-auto px-4 md:px-8 grid md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:grid-cols-[minmax(0,4fr)_minmax(0,5fr)_minmax(0,4fr)] gap-8 md:gap-10 lg:gap-12 items-center">
             <div
-              class="aspect-[4/3] md:aspect-[4/5] max-h-[78vh] w-full flex flex-col justify-between p-6 md:p-8 text-white border border-white/10"
+              class="fit-box aspect-[4/3] md:aspect-[4/5] lg:aspect-square w-full flex flex-col justify-between p-6 md:p-7 text-white border border-white/10"
               style={`background-color:${r.data.color}`}
             >
-              <p class="font-nav text-xs md:text-sm opacity-80 flex justify-between gap-4">
+              <p class="font-nav text-xs md:text-sm opacity-80 flex flex-wrap justify-between gap-x-4 gap-y-1">
                 <span>{pad(i + 1)} / {pad(total)}{r.data.group === "leadership" ? " · Leadership" : ""}</span>
                 <span class="text-right">{r.data.location ?? ""}</span>
               </p>
               <div>
                 <p class="font-nav text-sm md:text-base opacity-90 mb-3">{r.data.dates}</p>
-                <h2 class={`font-display ${nameSize(r.data.company)}`}>{r.data.company}</h2>
+                <h2 class="font-display" style={fit(r.data.company, "3.75rem")}>{r.data.company}</h2>
               </div>
             </div>
-            <div class="flex flex-col gap-6">
+            <div class="fit-box flex flex-col gap-6 min-w-0">
               <div>
-                <p class="font-display text-6xl md:text-8xl">{r.data.stat}</p>
+                <p class="font-display" style={fit(r.data.stat, "5rem")}>{r.data.stat}</p>
                 <p class="text-lg md:text-xl mt-2 max-w-md">{r.data.statLabel}</p>
               </div>
               <p class="font-bold text-xl md:text-2xl leading-snug border-t border-white/20 pt-5">{r.data.role}</p>
@@ -235,14 +232,69 @@ const groups = [
                 {nextLink}
               </div>
             </div>
+            {r.data.image && (
+              r.data.video ? (
+                <button
+                  type="button"
+                  class="exp-media group md:col-start-2 lg:col-start-auto"
+                  data-video={url(r.data.video)}
+                  data-title={`${r.data.company} video`}
+                  aria-label={`Play ${r.data.company} video`}
+                >
+                  <img src={url(r.data.image)} alt={`${r.data.company}`} width="1000" height="1000" loading="lazy" />
+                  <span class="exp-badge"><span class="exp-play" aria-hidden="true"></span>Play video</span>
+                </button>
+              ) : r.data.link ? (
+                <a href={r.data.link} target="_blank" rel="noopener" class="exp-media group md:col-start-2 lg:col-start-auto" aria-label={`${r.data.linkLabel ?? "Open"} (opens in a new tab)`}>
+                  <img src={url(r.data.image)} alt={`${r.data.company}`} width="1000" height="1000" loading="lazy" />
+                  <span class="exp-badge">{r.data.linkLabel ?? "Open"} ↗</span>
+                </a>
+              ) : (
+                <div class="exp-media md:col-start-2 lg:col-start-auto">
+                  <img src={url(r.data.image)} alt={`${r.data.company}`} width="1000" height="1000" loading="lazy" />
+                </div>
+              )
+            )}
           </div>
         </li>
       );
     })}
   </ol>
 
+  <!-- Video player popup -->
+  <dialog id="video-dialog" class="video-dialog" aria-label="Video">
+    <button type="button" class="video-close font-nav" aria-label="Close video">Close ✕</button>
+    <video id="video-player" controls playsinline preload="metadata"></video>
+  </dialog>
+
   <style>
     .tl-bar { min-width: 8px; transition: filter 0.2s; }
+    .fit-box { container-type: inline-size; }
+    .exp-media {
+      position: relative; display: block; width: 100%; max-width: 100%; aspect-ratio: 1 / 1;
+      overflow: hidden; background: #111; border: 1px solid rgb(255 255 255 / 0.1);
+      padding: 0; cursor: default;
+    }
+    button.exp-media, a.exp-media { cursor: pointer; }
+    .exp-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s ease; }
+    button.exp-media:hover img, a.exp-media:hover img { transform: scale(1.03); }
+    .exp-badge {
+      position: absolute; left: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 8px;
+      background: #fff; color: #000; font-family: var(--font-nav); text-transform: uppercase;
+      font-size: 11px; letter-spacing: 0.04em; padding: 7px 12px;
+    }
+    .exp-play { width: 0; height: 0; border-left: 8px solid #000; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+    .exp-media:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+    .video-dialog {
+      background: #000; border: 1px solid rgb(255 255 255 / 0.2); padding: 0; max-width: min(92vw, 1200px);
+      max-height: 90vh; color: #fff; overflow: visible;
+    }
+    .video-dialog::backdrop { background: rgb(0 0 0 / 0.85); }
+    .video-dialog video { display: block; max-width: min(92vw, 1200px); max-height: 85vh; width: auto; height: auto; }
+    .video-close {
+      position: absolute; top: -36px; right: 0; background: none; border: 0; color: #fff;
+      text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em; cursor: pointer;
+    }
     .tl-bar:hover { filter: brightness(1.3); }
     .present-label {
       writing-mode: vertical-rl;
@@ -265,6 +317,7 @@ const groups = [
         return idx;
       };
       document.addEventListener("keydown", (e) => {
+        if ((document.getElementById("video-dialog") as HTMLDialogElement | null)?.open) return;
         const t = e.target as HTMLElement;
         if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
         if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -279,5 +332,21 @@ const groups = [
       });
     }
     setup();
+
+    // Clicking a role picture with a video opens it in the popup player.
+    const dialog = document.getElementById("video-dialog") as HTMLDialogElement;
+    const player = document.getElementById("video-player") as HTMLVideoElement;
+    document.querySelectorAll<HTMLButtonElement>("[data-video]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        player.src = btn.dataset.video ?? "";
+        dialog.setAttribute("aria-label", btn.dataset.title ?? "Video");
+        dialog.showModal();
+        player.play().catch(() => {});
+      }),
+    );
+    const closeVideo = () => dialog.close();
+    dialog.querySelector(".video-close")?.addEventListener("click", closeVideo);
+    dialog.addEventListener("click", (e) => { if (e.target === dialog) closeVideo(); });
+    dialog.addEventListener("close", () => { player.pause(); player.removeAttribute("src"); player.load(); });
   </script>
 </Layout>

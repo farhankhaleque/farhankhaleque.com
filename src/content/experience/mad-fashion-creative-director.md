@@ -10,6 +10,8 @@ stat: "24"
 statLabel: "models in the fashion show I creative directed in Madrid"
 summary: "Creative direction for the club's fashion show in Madrid"
 color: "#505050"
+image: "/experience/mad-fashion-creative-director.jpg"
+video: "/experience/video/mad-fashion-creative-director.mp4"
 ---
 
 - Led creative direction for the club's fashion show in Madrid, directing 1 stylist, 2 designers, 24 models, and 5 staff members

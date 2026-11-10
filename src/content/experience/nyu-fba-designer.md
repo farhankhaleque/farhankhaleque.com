@@ -10,6 +10,8 @@ stat: "12"
 statLabel: "garments designed, patterned, and constructed for the NYU runway show"
 summary: "12 garments for the NYU runway show"
 color: "#454545"
+image: "/experience/nyu-fba-designer.jpg"
+video: "/experience/video/nyu-fba-designer.mp4"
 ---
 
 - Designed, patterned, and constructed 12 garments for the NYU runway show, running fittings with models over 3 months

@@ -10,6 +10,8 @@ stat: "$22K"
 statLabel: "across 4 drops at about 65% gross margin"
 summary: "My streetwear label: 4 drops, about $22K at 65% margin"
 color: "#1e1e1e"
+image: "/experience/aurangzeb.jpg"
+video: "/experience/video/aurangzeb.mp4"
 ---
 
 - Plan assortment, pricing, and inventory for 4 drops at $70 to $130, using each drop's sell through to plan the next, earning about $22K at 65% margin

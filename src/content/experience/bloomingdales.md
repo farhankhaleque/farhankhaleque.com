@@ -9,6 +9,9 @@ stat: "$100M+"
 statLabel: "men's designer shoe business across 97 vendors"
 summary: "Men's designer shoes, a $100M+ business across 97 vendors"
 color: "#2e2e2e"
+image: "/experience/bloomingdales.jpg"
+link: "https://claude.ai/artifact/UevKZHW6HH6QzzbXmCpoYP"
+linkLabel: "Try the Jewelry Stacker"
 ---
 
 - Delivered weekly sales, sell through, and stock to sales analysis by category and vendor for a $100M+ men's designer shoe business across 97 vendors, about $2M in weekly sales

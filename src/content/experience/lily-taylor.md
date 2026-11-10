@@ -9,6 +9,7 @@ stat: "300+"
 statLabel: "styles live on a Shopify store I built from scratch"
 summary: "Built the Shopify store from scratch and took 300+ styles live"
 color: "#353535"
+image: "/experience/lily-taylor.jpg"
 ---
 
 - Independently built the brand's Shopify store from scratch and took 300+ styles live with product copy, imagery, SKUs, sizes, and attributes
