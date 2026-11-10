@@ -3,29 +3,22 @@ import Layout from "@/layouts/Layout.astro";
 import { PHOTOS } from "@/data/gallery";
 import { url } from "@/consts";
 
-const counts = new Map<string, number>();
-const tiles = PHOTOS.map((p) => {
-  const n = (counts.get(p.source) ?? 0) + 1;
-  counts.set(p.source, n);
-  return { ...p, n };
-});
 ---
 
-<Layout title="Lookbook" description="Lookbook: photos of Farhan Khaleque's work across Aurangzeb, runway shows, Pull&Bear, Street Denim, and more.">
+<Layout title="Lookbook" description="Lookbook: editorial photos from the MAD Fashion show in Madrid, Pull&Bear, and the NYU FBA fashion show.">
   <section class="w-full flex flex-col-reverse md:flex-row gap-6 md:gap-0 px-4 md:px-6 pt-24 pb-24">
     <ul class="flex-1 min-w-0 columns-2 md:columns-3 gap-3 md:gap-4">
-      {tiles.map((t) => (
+      {PHOTOS.map((p, i) => (
         <li class="break-inside-avoid mb-3 md:mb-4">
-          {t.src ? (
-            <img src={url(t.src)} alt={t.alt ?? t.source} loading="lazy" class="w-full block" />
-          ) : (
-            <div
-              class="w-full bg-neutral-800"
-              style={`aspect-ratio:${t.ratio ?? "3/4"}`}
-              role="img"
-              aria-label={`${t.source}, photo ${t.n} (placeholder)`}
-            ></div>
-          )}
+          <img
+            src={url(p.src)}
+            alt={p.alt}
+            width={p.width}
+            height={p.height}
+            loading={i < 6 ? "eager" : "lazy"}
+            decoding="async"
+            class="w-full h-auto block bg-neutral-900"
+          />
         </li>
       ))}
     </ul>
