@@ -85,7 +85,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
                 loading={i < 2 ? "eager" : "lazy"}
                 decoding="async"
                 draggable={false}
-                className="self-center w-full h-auto aspect-[3/4] object-cover md:w-auto md:aspect-auto md:max-h-[80vh] max-w-full"
+                className="self-center block w-full max-w-[60vh] h-auto aspect-[3/4] object-cover"
               />
             ) : (
               <div
