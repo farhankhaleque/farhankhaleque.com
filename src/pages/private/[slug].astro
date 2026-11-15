@@ -1,0 +1,20 @@
+---
+// One page per src/data/private/<slug>.enc.json (other than index).
+import Layout from "@/layouts/Layout.astro";
+import PrivateTerminal from "@/components/PrivateTerminal.astro";
+
+export function getStaticPaths() {
+  const files = import.meta.glob<{ default: any }>("../../data/private/*.enc.json", { eager: true });
+  return Object.entries(files)
+    .map(([file, mod]) => ({ slug: file.split("/").pop()!.replace(".enc.json", ""), payload: mod.default }))
+    .filter(({ slug }) => slug !== "index")
+    .map(({ slug, payload }) => ({ params: { slug }, props: { payload } }));
+}
+
+const { slug } = Astro.params;
+const { payload } = Astro.props;
+---
+
+<Layout title="Private" description="A private page." noindex>
+  <PrivateTerminal payload={payload} path={`~/private/projects/${slug}`} />
+</Layout>

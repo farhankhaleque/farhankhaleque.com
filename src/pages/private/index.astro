@@ -1,0 +1,9 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import PrivateTerminal from "@/components/PrivateTerminal.astro";
+import payload from "@/data/private/index.enc.json";
+---
+
+<Layout title="Private" description="A private page." noindex>
+  <PrivateTerminal payload={payload} path="~/private" />
+</Layout>
