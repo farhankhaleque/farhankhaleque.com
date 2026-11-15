@@ -1,0 +1,131 @@
+---
+// Terminal window used by every /private page. The page body arrives as
+// AES-GCM ciphertext (see scripts/encrypt-private.mjs) and is decrypted in the
+// browser once the visitor types the password. The password is kept in
+// sessionStorage so moving between private pages doesn't ask again.
+interface Props {
+  payload: { iterations: number; salt: string; iv: string; data: string };
+  path: string; // shown in the title bar, e.g. "~/private"
+}
+const { payload, path } = Astro.props;
+---
+
+<section class="term-wrap">
+  <div class="term" role="region" aria-label="Private terminal">
+    <div class="term-bar" aria-hidden="true">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="term-title">farhan@khaleque: {path}</span>
+    </div>
+    <div class="term-body">
+      <div id="term-gate">
+        <p><span class="t-prompt">farhan@khaleque:~$</span> cd {path}</p>
+        <p class="t-out">{path}: restricted. authentication required.</p>
+        <form id="term-form" class="term-line" autocomplete="off">
+          <label for="term-pw" class="t-prompt">password:</label>
+          <input id="term-pw" type="password" inputmode="numeric" autocomplete="current-password" spellcheck="false" autofocus aria-label="Password" />
+          <span class="cursor" aria-hidden="true"></span>
+        </form>
+        <p id="term-msg" class="t-dim" role="status" aria-live="polite"></p>
+      </div>
+      <div id="term-content" hidden></div>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .term-wrap { display: flex; justify-content: center; padding: 7rem 0 6rem; width: 100%; }
+  .term {
+    --t-green: #4af626; --t-text: #e6e6e6; --t-dim: #7d7d7d; --t-bg: #0a0a0a;
+    width: 100%; max-width: 52rem; background: var(--t-bg); color: var(--t-text);
+    border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden;
+    font-family: "Courier Prime", "Courier New", ui-monospace, monospace;
+    box-shadow: 0 0 0 1px #000, 0 20px 60px rgba(74, 246, 38, 0.06);
+  }
+  .term-bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #161616; border-bottom: 1px solid #2a2a2a; }
+  .term-bar .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .term-bar .r { background: #ff5f57; } .term-bar .y { background: #febc2e; } .term-bar .g { background: #28c840; }
+  .term-title { flex: 1; text-align: center; color: var(--t-dim); font-size: 0.85rem; margin-right: 44px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .term-body { padding: 1.25rem 1.25rem 1.75rem; font-size: 1.05rem; line-height: 1.7; min-height: 22rem; overflow-wrap: anywhere; }
+  .term-body p { margin: 0 0 0.35rem; }
+  .term-body .t-out { margin-bottom: 1.1rem; }
+  .t-prompt { color: var(--t-green); font-weight: 700; margin-right: 0.5ch; }
+  .t-dim { color: var(--t-dim); }
+  .t-h { color: var(--t-green); font-size: 1.05rem; font-weight: 700; margin: 0.6rem 0 0.3rem; }
+  .t-title { font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 700; margin: 0.5rem 0 1rem; }
+  .t-list { list-style: none; padding: 0; margin: 0 0 1.25rem; }
+  .t-list a, .t-back a { color: var(--t-text); text-decoration: none; display: inline-block; padding: 0.1rem 0.4rem; margin-left: -0.4rem; }
+  .t-list a .t-dim { margin-right: 1.5ch; }
+  .t-list a:hover, .t-list a:focus-visible, .t-back a:hover, .t-back a:focus-visible { background: var(--t-green); color: #000; outline: none; }
+  .t-list a:hover .t-dim, .t-list a:focus-visible .t-dim { color: #000; }
+  .t-back { margin-top: 1.5rem; }
+  .term-line { display: flex; align-items: center; margin: 0; }
+  .term-line input {
+    background: transparent; border: 0; outline: none; color: var(--t-text); font: inherit;
+    caret-color: transparent; width: 0; min-width: 1ch; field-sizing: content; letter-spacing: 0.15em; padding: 0;
+  }
+  .cursor { display: inline-block; width: 0.6em; height: 1.15em; background: var(--t-green); animation: t-blink 1s steps(1) infinite; }
+  .term-line input:not(:focus) + .cursor { animation: none; background: transparent; outline: 1px solid var(--t-green); }
+  .t-err { color: #ff5f57; }
+  @keyframes t-blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+  @media (max-width: 640px) { .term-body { font-size: 0.95rem; padding: 1rem; } .t-list a .t-dim { display: none; } }
+</style>
+
+<script is:inline define:vars={{ payload }}>
+  const KEY = "private-page-password";
+  const form = document.getElementById("term-form");
+  const input = document.getElementById("term-pw");
+  const msg = document.getElementById("term-msg");
+  const gate = document.getElementById("term-gate");
+  const out = document.getElementById("term-content");
+  const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const store = {
+    get() { try { return sessionStorage.getItem(KEY); } catch { return null; } },
+    set(v) { try { sessionStorage.setItem(KEY, v); } catch {} },
+    clear() { try { sessionStorage.removeItem(KEY); } catch {} },
+  };
+
+  async function unlock(password) {
+    const enc = new TextEncoder();
+    const base = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+    const key = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: unb64(payload.salt), iterations: payload.iterations, hash: "SHA-256" },
+      base, { name: "AES-GCM", length: 256 }, false, ["decrypt"],
+    );
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(payload.iv) }, key, unb64(payload.data));
+    return new TextDecoder().decode(plain);
+  }
+
+  function show(html) {
+    out.innerHTML = html;
+    gate.hidden = true;
+    out.hidden = false;
+    const first = out.querySelector("a");
+    if (first && document.activeElement === input) first.focus({ preventScroll: true });
+  }
+
+  // Clicking anywhere in the terminal focuses the password prompt.
+  document.querySelector(".term-body").addEventListener("click", () => { if (!gate.hidden) input.focus(); });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!input.value) return;
+    msg.className = "t-dim";
+    msg.textContent = "verifying…";
+    try {
+      const html = await unlock(input.value);
+      store.set(input.value);
+      show(html);
+    } catch {
+      msg.className = "t-err";
+      msg.textContent = "access denied. try again.";
+      input.value = "";
+    }
+  });
+
+  const saved = store.get();
+  if (saved) {
+    msg.textContent = "authenticating…";
+    unlock(saved).then(show).catch(() => { store.clear(); msg.textContent = ""; });
+  }
+</script>

@@ -13,7 +13,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "encrypt-private": "node scripts/encrypt-private.mjs"
+    "encrypt-private": "node scripts/encrypt-private.mjs",
+    "decrypt-private": "node scripts/encrypt-private.mjs --decrypt"
   },
   "dependencies": {
     "@astrojs/mdx": "8.1.2",
