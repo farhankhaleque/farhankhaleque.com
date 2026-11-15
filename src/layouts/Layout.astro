@@ -11,15 +11,16 @@ interface Props {
   title?: string;
   description?: string;
   footer?: boolean;
+  noindex?: boolean;
 }
-const { title, description = SITE_DESCRIPTION, footer = false } = Astro.props;
+const { title, description = SITE_DESCRIPTION, footer = false, noindex = false } = Astro.props;
 const fullTitle = title ? `${title} · ${SITE_TITLE}` : SITE_TITLE;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-    <BaseHead title={fullTitle} description={description} />
+    <BaseHead title={fullTitle} description={description} noindex={noindex} />
     <style is:inline>
       body { font-family: "Courier Prime", "Courier New", monospace; background-color: #000000; color: #f4f4f4; margin: 0; padding: 0; }
       .container { max-width: 100%; margin: 0 auto; }
