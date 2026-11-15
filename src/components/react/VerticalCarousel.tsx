@@ -23,6 +23,8 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   const [isMobile, setIsMobile] = useState(false);
   const [paused, setPaused] = useState(false);
   const [reduced, setReduced] = useState(false);
+  // Wheel scrolling while hovered: deltas queue here and ease in over a few frames.
+  const pending = useRef(0);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -38,20 +40,44 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
     x.set(0);
   }, [isMobile, y, x]);
 
+  // Hovering stops the auto scroll; the mouse wheel then moves the carousel
+  // up or down (no scrollbar, the page itself doesn't scroll).
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el || reduced) return;
+    const onWheel = (e: WheelEvent) => {
+      const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? el.clientHeight : 1;
+      const d = (Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX) * unit;
+      if (!d) return;
+      e.preventDefault();
+      pending.current += d;
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [reduced]);
+
+  // Keep the offset inside one copy of the doubled list so the loop is seamless both ways.
+  const wrap = (v: number, half: number) => {
+    if (half <= 0) return v;
+    v %= half;
+    return v > 0 ? v - half : v;
+  };
+
   useAnimationFrame((_, delta) => {
     const content = contentRef.current;
-    if (!content || paused || reduced || panels.length === 0) return;
-    const distance = ((scrollSpeed * 1000) / Math.max(1, interval)) * (delta / 1000);
+    if (!content || reduced || panels.length === 0) return;
+    let distance = 0;
+    if (!paused) distance += ((scrollSpeed * 1000) / Math.max(1, interval)) * (delta / 1000);
+    if (pending.current) {
+      const step = Math.abs(pending.current) < 0.5 ? pending.current : pending.current * 0.25;
+      pending.current -= step;
+      distance += step;
+    }
+    if (!distance) return;
     if (isMobile) {
-      const half = content.scrollWidth / 2;
-      let next = x.get() - distance;
-      if (Math.abs(next) >= half) next += half;
-      x.set(next);
+      x.set(wrap(x.get() - distance, content.scrollWidth / 2));
     } else {
-      const half = content.scrollHeight / 2;
-      let next = y.get() - distance;
-      if (Math.abs(next) >= half) next += half;
-      y.set(next);
+      y.set(wrap(y.get() - distance, content.scrollHeight / 2));
     }
   });
 
@@ -62,7 +88,10 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
       className="h-[56vh] md:h-screen w-full overflow-hidden relative"
       ref={carouselRef}
       onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      onMouseLeave={() => {
+        setPaused(false);
+        pending.current = 0;
+      }}
       aria-label="Highlights"
     >
       <motion.div

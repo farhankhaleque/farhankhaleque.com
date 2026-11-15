@@ -69,52 +69,90 @@ const layouts = [
       flex-direction: column;
       gap: 0.75rem;
       will-change: transform;
-      animation: lb-up var(--lb-duration, 120s) linear infinite;
     }
     @media (min-width: 768px) {
       .lb-track { gap: 1rem; }
     }
-    .lb-track.lb-down { animation-name: lb-down; }
-    .lb-viewport:hover .lb-track { animation-play-state: paused; }
     .lb-img {
       display: block;
       width: 100%;
       height: auto;
       background: #171717;
     }
-    /* The track holds the column twice; moving it by half its height (plus half a gap)
-       lands exactly on the start of the second copy, so the loop is seamless. */
-    @keyframes lb-up {
-      from { transform: translateY(0); }
-      to { transform: translateY(calc(-50% - var(--lb-gap-half, 0.375rem))); }
-    }
-    @keyframes lb-down {
-      from { transform: translateY(calc(-50% - var(--lb-gap-half, 0.375rem))); }
-      to { transform: translateY(0); }
-    }
-    @media (min-width: 768px) {
-      .lb-track { --lb-gap-half: 0.5rem; }
-    }
     /* Reduced motion: a normal, scrollable grid with no animation and no repeated photos */
     @media (prefers-reduced-motion: reduce) {
       .lb-viewport { height: auto; overflow: visible; }
       .lb-col { height: auto; }
-      .lb-track { animation: none; }
+      .lb-track { transform: none !important; }
       .lb-track img[aria-hidden="true"] { display: none; }
     }
   </style>
 
   <script>
-    // Same scroll speed for every column: duration = distance / speed.
+    // Each column loops endlessly; neighbours move in opposite directions.
+    // Hovering stops the auto scroll, and the mouse wheel then moves every column
+    // up or down together (no scrollbar, the page itself doesn't scroll).
     const SPEED = 30; // pixels per second
-    function setDurations() {
-      document.querySelectorAll<HTMLElement>(".lb-track").forEach((t) => {
-        const distance = t.scrollHeight / 2;
-        if (distance > 0) t.style.setProperty("--lb-duration", `${distance / SPEED}s`);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    type Track = { el: HTMLElement; dir: number; offset: number };
+    const tracks: Track[] = [...document.querySelectorAll<HTMLElement>(".lb-track")].map((el) => ({
+      el,
+      dir: el.classList.contains("lb-down") ? 1 : -1,
+      offset: 0,
+    }));
+
+    // The track holds the column twice; one copy plus one gap is the loop length.
+    const period = (el: HTMLElement) =>
+      (el.scrollHeight + (parseFloat(getComputedStyle(el).rowGap) || 0)) / 2;
+    const wrap = (v: number, p: number) => {
+      if (p <= 0) return 0;
+      v %= p;
+      return v > 0 ? v - p : v;
+    };
+
+    let paused = false;
+    let pending = 0;
+
+    document.querySelectorAll<HTMLElement>(".lb-viewport").forEach((vp) => {
+      vp.addEventListener("mouseenter", () => (paused = true));
+      vp.addEventListener("mouseleave", () => {
+        paused = false;
+        pending = 0;
       });
+      if (reduced) return;
+      vp.addEventListener(
+        "wheel",
+        (e) => {
+          const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? vp.clientHeight : 1;
+          const d = e.deltaY * unit;
+          if (!d) return;
+          e.preventDefault();
+          pending += d;
+        },
+        { passive: false },
+      );
+    });
+
+    if (!reduced) {
+      let last = performance.now();
+      const frame = (now: number) => {
+        const dt = Math.min(0.1, (now - last) / 1000);
+        last = now;
+        let wheel = 0;
+        if (pending) {
+          wheel = Math.abs(pending) < 0.5 ? pending : pending * 0.25;
+          pending -= wheel;
+        }
+        for (const t of tracks) {
+          if (t.el.offsetParent === null) continue; // hidden layout (phone vs desktop)
+          const p = period(t.el);
+          t.offset = wrap(t.offset + (paused ? 0 : t.dir * SPEED * dt) - wheel, p);
+          t.el.style.transform = `translate3d(0, ${t.offset}px, 0)`;
+        }
+        requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
     }
-    setDurations();
-    window.addEventListener("load", setDurations);
-    window.addEventListener("resize", setDurations);
   </script>
 </Layout>
