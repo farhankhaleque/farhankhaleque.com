@@ -13,7 +13,7 @@ export default defineConfig({
   base: process.env.BASE_PATH || "/",
   output: 'static',
   build: { assets: 'assets' },
-  integrations: [mdx(), sitemap(), icon(), react()],
+  integrations: [mdx(), sitemap({ filter: (page) => !page.includes("/private") }), icon(), react()],
   vite: {
     plugins: [tailwindcss()],
   },

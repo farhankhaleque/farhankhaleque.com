@@ -28,6 +28,19 @@ Then open http://localhost:4321.
 To add a photo to a project, put it in `public/lookbook/` and add
 `image: "/lookbook/your-photo.jpg"` to the project's frontmatter.
 
+## Private page
+
+`/private` asks for a password. Its content is encrypted before it's committed,
+so the repo and the live site only hold ciphertext. To change the content or
+the password:
+
+1. Edit `private/content.html` (gitignored; start from `private/content.example.html`).
+2. Run `npm run encrypt-private -- "new password"`.
+3. Commit `src/data/private.enc.json` and push.
+
+The page isn't linked from the menu, is left out of the sitemap, and tells
+search engines not to index it.
+
 ## Deploy
 
 Every push to `main` builds the site and publishes it to GitHub Pages
