@@ -1,16 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { URLS, url } from "@/consts";
+import { URLS } from "@/consts";
 import OptimizedIcon from "../OptimizedIcon";
 
 export default function Navigation() {
+  // Starts closed on every page: the three bars show first, and a click opens the menu.
   const [isOpen, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.location.pathname.replace(/\/$/, "") === url("/").replace(/\/$/, "")) {
-      setOpen(true);
-    }
-  }, []);
 
   const handleLinkClick = () => {
     setOpen(false);
