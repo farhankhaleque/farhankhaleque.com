@@ -100,9 +100,26 @@ const { payload, path } = Astro.props;
     out.innerHTML = html;
     gate.hidden = true;
     out.hidden = false;
-    const first = out.querySelector("a");
-    if (first && document.activeElement === input) first.focus({ preventScroll: true });
+    // Highlight the first menu item so the arrow keys work straight away.
+    const first = out.querySelector(".t-list a");
+    if (first) first.focus({ preventScroll: true });
   }
+
+  // Up/Down (and Home/End) move through the menu; Enter opens the item.
+  document.addEventListener("keydown", (e) => {
+    if (out.hidden || e.altKey || e.ctrlKey || e.metaKey) return;
+    const items = [...out.querySelectorAll(".t-list a")];
+    if (!items.length) return;
+    const i = items.indexOf(document.activeElement);
+    let next;
+    if (e.key === "ArrowDown") next = i < 0 ? 0 : (i + 1) % items.length;
+    else if (e.key === "ArrowUp") next = i < 0 ? items.length - 1 : (i - 1 + items.length) % items.length;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = items.length - 1;
+    else return;
+    e.preventDefault();
+    items[next].focus();
+  });
 
   // Clicking anywhere in the terminal focuses the password prompt.
   document.querySelector(".term-body").addEventListener("click", () => { if (!gate.hidden) input.focus(); });
