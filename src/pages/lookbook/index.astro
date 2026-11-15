@@ -90,16 +90,19 @@ const layouts = [
 
   <script>
     // Each column loops endlessly; neighbours move in opposite directions.
-    // Hovering stops the auto scroll, and the mouse wheel then moves every column
-    // up or down together (no scrollbar, the page itself doesn't scroll).
+    // Each column is independent: hovering one stops only that column, and the
+    // mouse wheel then moves it up or down (no scrollbar, the page doesn't scroll)
+    // while the other columns keep their own auto scroll.
     const SPEED = 30; // pixels per second
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    type Track = { el: HTMLElement; dir: number; offset: number };
+    type Track = { el: HTMLElement; dir: number; offset: number; paused: boolean; pending: number };
     const tracks: Track[] = [...document.querySelectorAll<HTMLElement>(".lb-track")].map((el) => ({
       el,
       dir: el.classList.contains("lb-down") ? 1 : -1,
       offset: 0,
+      paused: false,
+      pending: 0,
     }));
 
     // The track holds the column twice; one copy plus one gap is the loop length.
@@ -111,43 +114,41 @@ const layouts = [
       return v > 0 ? v - p : v;
     };
 
-    let paused = false;
-    let pending = 0;
-
-    document.querySelectorAll<HTMLElement>(".lb-viewport").forEach((vp) => {
-      vp.addEventListener("mouseenter", () => (paused = true));
-      vp.addEventListener("mouseleave", () => {
-        paused = false;
-        pending = 0;
+    for (const t of tracks) {
+      const col = t.el.parentElement as HTMLElement;
+      col.addEventListener("mouseenter", () => (t.paused = true));
+      col.addEventListener("mouseleave", () => {
+        t.paused = false;
+        t.pending = 0;
       });
-      if (reduced) return;
-      vp.addEventListener(
+      if (reduced) continue;
+      col.addEventListener(
         "wheel",
         (e) => {
-          const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? vp.clientHeight : 1;
+          const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? col.clientHeight : 1;
           const d = e.deltaY * unit;
           if (!d) return;
           e.preventDefault();
-          pending += d;
+          t.pending += d;
         },
         { passive: false },
       );
-    });
+    }
 
     if (!reduced) {
       let last = performance.now();
       const frame = (now: number) => {
         const dt = Math.min(0.1, (now - last) / 1000);
         last = now;
-        let wheel = 0;
-        if (pending) {
-          wheel = Math.abs(pending) < 0.5 ? pending : pending * 0.25;
-          pending -= wheel;
-        }
         for (const t of tracks) {
           if (t.el.offsetParent === null) continue; // hidden layout (phone vs desktop)
+          let wheel = 0;
+          if (t.pending) {
+            wheel = Math.abs(t.pending) < 0.5 ? t.pending : t.pending * 0.25;
+            t.pending -= wheel;
+          }
           const p = period(t.el);
-          t.offset = wrap(t.offset + (paused ? 0 : t.dir * SPEED * dt) - wheel, p);
+          t.offset = wrap(t.offset + (t.paused ? 0 : t.dir * SPEED * dt) - wheel, p);
           t.el.style.transform = `translate3d(0, ${t.offset}px, 0)`;
         }
         requestAnimationFrame(frame);
