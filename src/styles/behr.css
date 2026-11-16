@@ -125,6 +125,10 @@ body.jb-body { margin: 0; background: var(--jb-bg); color: var(--jb-text); font-
 .jb-deltas { position: absolute; right: 0; top: 100%; display: flex; flex-direction: column; align-items: flex-end; padding-top: 6px; pointer-events: none; }
 .jb-deltas span { font-family: var(--jb-display); font-style: italic; font-size: 17px; color: var(--jb-gold); }
 
+/* ---------- animal helpers ---------- */
+.jb-helpers { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 24; }
+.jb-helper { position: absolute; left: 0; top: 0; will-change: transform; }
+
 /* ---------- step grid (product-grid style) ---------- */
 .jb-grid-wrap { padding: 0 0 110px; }
 .jb-toolbar--grid { padding-bottom: 22px; }
