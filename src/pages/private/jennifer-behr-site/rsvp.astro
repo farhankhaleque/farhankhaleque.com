@@ -14,10 +14,11 @@ import { url } from "@/consts";
     <main class="jb-rsvp">
       <section class="jb-rsvp-card">
         <p class="jb-logo jb-logo--card">Jennifer&nbsp;&nbsp;Behr</p>
-        <h1 class="jb-display jb-display--center">An Evening<br />in the Studio</h1>
+        <h1 class="jb-display jb-display--center">The First<br />Showing</h1>
         <p class="jb-body jb-center">
-          Before the Behr is seen anywhere else, it will be shown in person at our Brooklyn studio, alongside the wax models, the tools and the
-          hands that made it. Places are limited to fifty, one for each piece in the edition.
+          The Behr makes its debut at a New York design museum, among pieces chosen for their craft. Afterwards, guests are invited to our
+          Brooklyn studio to see the wax models, the tools and the hands that made it. Places are limited to fifty, one for each piece in the
+          edition.
         </p>
         <form id="rsvp" class="jb-form" novalidate>
           <label><span class="jb-sr">Full name</span><input name="name" autocomplete="name" placeholder="FULL NAME" required /></label>
@@ -36,6 +37,12 @@ import { url } from "@/consts";
             </select>
           </label>
           <fieldset>
+            <legend class="jb-q">Which showing?</legend>
+            <label class="jb-radio"><input type="radio" name="showing" value="both" checked /> Both</label>
+            <label class="jb-radio"><input type="radio" name="showing" value="museum" /> The museum debut</label>
+            <label class="jb-radio"><input type="radio" name="showing" value="studio" /> The studio visit</label>
+          </fieldset>
+          <fieldset>
             <legend class="jb-q">Guests</legend>
             <label class="jb-radio"><input type="radio" name="guests" value="1" checked /> Just me</label>
             <label class="jb-radio"><input type="radio" name="guests" value="2" /> Me and one guest</label>
@@ -46,7 +53,7 @@ import { url } from "@/consts";
         </form>
         <div id="rsvp-done" class="jb-done" hidden>
           <h2 class="jb-display jb-display--center">You're on the List</h2>
-          <p class="jb-body jb-center">Invitations are written by hand and sent from the studio. We'll be in touch with the date.</p>
+          <p class="jb-body jb-center">Invitations are written by hand and sent from the studio. We'll be in touch with the dates and the venue.</p>
           <p class="jb-center"><a class="jb-link" href={url("/private/jennifer-behr-site/")}>Back to the Behr</a></p>
         </div>
       </section>
