@@ -602,7 +602,10 @@ export default function BehrAtelier({ rsvpHref, shopHref, assets }: { rsvpHref: 
                   In our studio it takes {TOTAL_HOURS} hours of skilled hands: {STONE_COUNT} stones set one by one, a bow carved in wax and cast in
                   brass, a clasp we engineered ourselves. Fifty will be made.
                 </p>
-                <p className="jb-body">The Behr will be shown first in person, at a private exhibition in our Brooklyn studio.</p>
+                <p className="jb-body">
+                  The Behr will make its debut at a New York design museum, among pieces chosen for their craft. Afterwards, guests are
+                  invited to our Brooklyn studio to see the wax models, the tools and the hands that made it.
+                </p>
                 <a className="jb-btn" href={rsvpHref}>
                   RSVP for the first showing <span aria-hidden="true">+</span>
                 </a>
@@ -638,7 +641,14 @@ export default function BehrAtelier({ rsvpHref, shopHref, assets }: { rsvpHref: 
                         <strong>AO Grid: Educate.</strong> Teaching the process moves visitors from novice toward expert. The RSVP turns that
                         into an in-person showing for the people who carry the story.
                       </p>
-                      <p className="jb-fine">Hours, materials and the edition size are illustrative assumptions for this prototype.</p>
+                      <p>
+                        <strong>Borrowed cultural capital.</strong> The first showing is at a museum, not a store: the institution's cultural capital
+                        transfers to the piece, as with Prada and contemporary art or Hermès × Sugimoto at Art Basel. Proposed venue: the Museum of
+                        Arts and Design (MAD), with The Salon Art + Design (via a partner gallery) for collectors. Curators{"'"} selection is the{" "}
+                        <em>Induct</em> step. The studio visit that follows is <em>Expertize</em>, and it keeps the factory at its original location
+                        in the story. A gallery or fair rather than an auction, per the course rule on new product.
+                      </p>
+                      <p className="jb-fine">Hours, materials, the edition size and the venues are illustrative assumptions for this prototype, not confirmed partnerships.</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
