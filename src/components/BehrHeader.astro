@@ -1,0 +1,37 @@
+---
+// Header in the style of jenniferbehr.com: sage announcement band, then a
+// sticky bar with nav left, spaced wordmark centre, utilities right.
+// The announcement band carries the "student concept" disclosure.
+import { url } from "@/consts";
+const JB = "https://www.jenniferbehr.com";
+---
+<div class="jb-announce-top">Concept prototype</div>
+<div class="jb-announce">A student concept for MKTG-UB Luxury Marketing, NYU Stern. Not affiliated with or endorsed by Jennifer Behr.</div>
+<header class="jb-header">
+  <nav class="jb-nav" aria-label="Shop">
+    <a href={`${JB}/collections/shop-all`}>Shop Fashion</a>
+    <a href={`${JB}/`}>Shop Bridal</a>
+    <a href={url("/private/jennifer-behr-site/")}>Discover</a>
+  </nav>
+  <button class="jb-burger" aria-label="Menu" aria-expanded="false" type="button"><span></span><span></span><span></span></button>
+  <a class="jb-logo" href={url("/private/jennifer-behr-site/")} aria-label="Jennifer Behr: The Behr">Jennifer&nbsp;&nbsp;Behr</a>
+  <div class="jb-utils">
+    <a href={`${JB}/collections/shop-all`} aria-label="Search the collection">
+      <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6.5" /><path d="M13.5 13.5 19 19" /></svg>
+    </a>
+    <a class="jb-util-text" href={`${JB}/`}>Wishlist</a>
+    <a class="jb-util-text" href={`${JB}/account`}>My Account</a>
+    <a class="jb-bag" href={`${JB}/cart`} aria-label="Bag">
+      <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.1" aria-hidden="true"><path d="M3 8h14l-1.6 10H4.6Z" /><path d="M7 8a3 3 0 0 1 6 0" /></svg>
+      <span class="jb-util-text">0</span>
+    </a>
+    <span class="jb-util-text jb-locale">United States</span>
+  </div>
+</header>
+<script is:inline>
+  (() => {
+    const h = document.querySelector(".jb-header");
+    const b = h && h.querySelector(".jb-burger");
+    if (b) b.addEventListener("click", () => b.setAttribute("aria-expanded", String(h.classList.toggle("open"))));
+  })();
+</script>
