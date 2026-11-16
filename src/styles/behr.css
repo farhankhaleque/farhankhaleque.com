@@ -1,0 +1,156 @@
+/* Jennifer Behr concept pages: black velvet, ivory type, brass accents. */
+:root {
+  --jb-bg: #000;
+  --jb-ink: #f3ede3;
+  --jb-mute: #9c968c;
+  --jb-line: #2b2925;
+  --jb-gold: #c9a24f;
+  --jb-gold-hi: #f0d896;
+  --jb-serif: "Crimson Pro", "Plantin MT Pro", Georgia, serif;
+  --jb-sans: "Hanken Grotesk", "Founders Grotesk Text", "Helvetica Neue", Arial, sans-serif;
+}
+
+html, body.jb-body { margin: 0; background: var(--jb-bg); color: var(--jb-ink); }
+body.jb-body { font-family: var(--jb-sans); -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column; }
+.jb-body * { box-sizing: border-box; }
+.jb-body :where(button) { font: inherit; }
+
+/* ---------- layout ---------- */
+.jb {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  grid-template-areas: "head head" "stage side";
+  gap: 0 3rem;
+  padding: 1.5rem clamp(1rem, 4vw, 3.5rem) 2rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+.jb-head { grid-area: head; display: flex; flex-direction: column; gap: 0.25rem; }
+.jb-mark { font-family: var(--jb-serif); font-size: 1.35rem; letter-spacing: 0.32em; color: var(--jb-ink); text-decoration: none; }
+.jb-sub { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--jb-mute); }
+
+.jb-stage { grid-area: stage; align-self: center; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+.jb--intro .jb-stage, .jb--done .jb-stage { cursor: default; }
+.jb-svg { width: 100%; height: auto; max-height: 78vh; display: block; overflow: visible; }
+.jb-svg-label { font-family: var(--jb-sans); font-size: 11px; letter-spacing: 0.08em; fill: var(--jb-ink); text-transform: uppercase; }
+.jb-svg-sub { font-family: var(--jb-serif); font-style: italic; font-size: 12px; fill: var(--jb-mute); }
+.jb-svg-edition { font-family: var(--jb-serif); font-style: italic; font-size: 17px; fill: var(--jb-gold-hi); letter-spacing: 0.06em; }
+
+.jb-intro, .jb-panel, .jb-final { grid-area: side; align-self: center; max-width: 30rem; }
+
+/* ---------- type ---------- */
+.jb-eyebrow { font-size: 0.72rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--jb-gold); margin: 0 0 1rem; }
+.jb-title { font-family: var(--jb-serif); font-weight: 300; font-size: clamp(2.8rem, 6vw, 5rem); line-height: 1; margin: 0 0 1.25rem; letter-spacing: -0.01em; }
+.jb-title--sm { font-size: clamp(2rem, 4vw, 3.2rem); }
+.jb-lede { font-family: var(--jb-serif); font-size: 1.3rem; line-height: 1.45; color: #ddd6ca; margin: 0 0 1.5rem; }
+.jb-lede strong { color: var(--jb-gold-hi); font-weight: 500; }
+.jb-fine { font-size: 0.78rem; color: var(--jb-mute); margin: 1rem 0 0; line-height: 1.5; }
+
+/* ---------- buttons ---------- */
+.jb-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0.95rem 1.8rem; min-height: 3rem;
+  background: var(--jb-ink); color: #000; border: 1px solid var(--jb-ink);
+  font-family: var(--jb-sans); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+  text-decoration: none; cursor: pointer; transition: background 0.25s, color 0.25s;
+}
+.jb-btn:hover { background: transparent; color: var(--jb-ink); }
+.jb-btn:focus-visible, .jb-link:focus-visible, .jb-notes-toggle:focus-visible { outline: 1px solid var(--jb-gold); outline-offset: 4px; }
+.jb-link {
+  background: none; border: 0; padding: 0.4rem 0; cursor: pointer;
+  color: var(--jb-ink); font-size: 0.78rem; letter-spacing: 0.2em; text-transform: uppercase; text-decoration: none;
+  border-bottom: 1px solid var(--jb-mute);
+}
+.jb-link:hover { border-color: var(--jb-gold); color: var(--jb-gold-hi); }
+
+/* ---------- hours counter ---------- */
+.jb-hud {
+  position: fixed; top: 1.25rem; right: clamp(1rem, 3vw, 2.5rem); z-index: 10;
+  width: 15.5rem; padding: 1rem 1.1rem;
+  background: rgba(10, 10, 9, 0.85); border: 1px solid var(--jb-line); backdrop-filter: blur(8px);
+}
+.jb-hud-label { font-size: 0.66rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--jb-gold); }
+.jb-hud-total { font-family: var(--jb-serif); font-size: 2.1rem; line-height: 1.15; margin: 0.2rem 0 0.55rem; font-variant-numeric: tabular-nums; }
+.jb-hud-bar { height: 2px; background: var(--jb-line); margin-bottom: 0.7rem; overflow: hidden; }
+.jb-hud-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--jb-gold), var(--jb-gold-hi)); transform-origin: left; }
+.jb-hud-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--jb-mute); padding: 0.15rem 0; font-variant-numeric: tabular-nums; }
+.jb-hud-row span:last-child { color: var(--jb-ink); }
+.jb-deltas { position: absolute; left: 0; right: 0; top: 100%; display: flex; flex-direction: column; align-items: flex-end; padding-top: 0.4rem; pointer-events: none; }
+.jb-deltas span { font-family: var(--jb-serif); font-style: italic; color: var(--jb-gold-hi); font-size: 1rem; }
+
+/* ---------- step panel ---------- */
+.jb-steps { display: flex; gap: 6px; margin-bottom: 1.5rem; }
+.jb-steps span { flex: 1; height: 2px; background: var(--jb-line); transition: background 0.4s; }
+.jb-steps .done { background: var(--jb-gold); }
+.jb-steps .now { background: var(--jb-ink); }
+.jb-step-title { font-family: var(--jb-serif); font-weight: 300; font-size: clamp(2.2rem, 4vw, 3.4rem); line-height: 1.05; margin: 0 0 1rem; }
+.jb-step-copy { font-family: var(--jb-serif); font-size: 1.2rem; line-height: 1.5; color: #ddd6ca; margin: 0 0 1.25rem; }
+.jb-tags { list-style: none; padding: 0; margin: 0 0 2rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.jb-tags li { font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--jb-mute); border: 1px solid var(--jb-line); padding: 0.35rem 0.6rem; }
+.jb-action { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+.jb-clicks { display: flex; gap: 6px; }
+.jb-clicks i { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--jb-mute); transition: background 0.3s, border-color 0.3s; }
+.jb-clicks i.on { background: var(--jb-gold); border-color: var(--jb-gold); }
+
+/* ---------- finale ---------- */
+.jb-stats { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--jb-line); border-bottom: 1px solid var(--jb-line); margin: 0 0 1.5rem; }
+.jb-stats div { padding: 1rem 0; }
+.jb-stats dt { font-size: 0.64rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--jb-mute); }
+.jb-stats dd { margin: 0.3rem 0 0; font-family: var(--jb-serif); font-size: 2.2rem; color: var(--jb-gold-hi); }
+.jb-final-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.75rem; margin-bottom: 2rem; }
+.jb-notes-toggle { background: none; border: 0; color: var(--jb-mute); font-size: 0.75rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 0; }
+.jb-notes { overflow: hidden; }
+.jb-notes p { font-size: 0.88rem; line-height: 1.55; color: #c8c1b5; margin: 1rem 0 0; }
+.jb-notes strong { color: var(--jb-ink); font-weight: 600; }
+
+/* ---------- RSVP ---------- */
+.jb-rsvp { flex: 1; width: 100%; max-width: 1400px; margin: 0 auto; padding: 1.5rem clamp(1rem, 4vw, 3.5rem) 3rem; }
+.jb-rsvp-card { max-width: 34rem; margin: clamp(3rem, 10vh, 7rem) auto 0; }
+.jb-form { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 2rem; }
+.jb-form label { display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--jb-mute); }
+.jb-form input:not([type="radio"]), .jb-form select {
+  background: transparent; border: 0; border-bottom: 1px solid #5a554d; color: var(--jb-ink);
+  font-family: var(--jb-serif); font-size: 1.25rem; padding: 0.4rem 0; border-radius: 0; outline: none; letter-spacing: 0; text-transform: none;
+}
+.jb-form select option { color: #000; }
+.jb-form input:focus, .jb-form select:focus { border-color: var(--jb-gold); }
+.jb-form fieldset { border: 0; padding: 0; margin: 0; display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.jb-form legend { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--jb-mute); margin-bottom: 0.6rem; }
+.jb-form .jb-radio { flex-direction: row; align-items: center; gap: 0.5rem; font-family: var(--jb-serif); font-size: 1.15rem; letter-spacing: 0; text-transform: none; color: var(--jb-ink); }
+.jb-form input[type="radio"] { accent-color: var(--jb-gold); width: 1rem; height: 1rem; }
+.jb-form .jb-btn { align-self: flex-start; margin-top: 0.5rem; }
+.jb-err { color: #e8a598; font-size: 0.85rem; min-height: 1.2em; margin: 0; }
+.jb-done[hidden], .jb-form[hidden] { display: none; }
+
+.jb-foot { padding: 1rem clamp(1rem, 4vw, 3.5rem) 1.25rem; font-size: 0.7rem; color: #6f6a62; text-align: center; border-top: 1px solid #141414; }
+
+/* ---------- small screens ---------- */
+@media (max-width: 860px) {
+  .jb { grid-template-columns: 1fr; grid-template-rows: auto auto auto; grid-template-areas: "head" "stage" "side"; gap: 0; padding-top: 1rem; }
+  .jb-head { padding-right: 9.5rem; }
+  .jb-mark { font-size: 1.05rem; letter-spacing: 0.24em; }
+  .jb-stage { margin: 0.5rem -0.5rem 0; }
+  .jb-svg { max-height: 46vh; }
+  .jb-intro, .jb-panel, .jb-final { max-width: none; }
+  /* Phones: the counter becomes a slim bar across the top. */
+  .jb--play, .jb--done { padding-top: 4.75rem; }
+  .jb-hud {
+    top: 0; left: 0; right: 0; width: auto; border-width: 0 0 1px; padding: 0.55rem 1rem 0.65rem;
+    display: grid; grid-template-columns: auto 1fr; grid-template-areas: "label row" "total row" "bar bar"; column-gap: 1rem; align-items: center;
+  }
+  .jb-hud-label { grid-area: label; font-size: 0.58rem; }
+  .jb-hud-total { grid-area: total; font-size: 1.35rem; margin: 0; }
+  .jb-hud-bar { grid-area: bar; margin: 0.45rem 0 0; }
+  .jb-hud-row { grid-area: row; justify-self: end; flex-direction: column; align-items: flex-end; font-size: 0.62rem; gap: 0.1rem; }
+  .jb-hud-row + .jb-hud-row { display: none; } /* while playing, show "this step" */
+  .jb-deltas { right: 1rem; left: auto; }
+  .jb-deltas span { font-size: 0.85rem; }
+  .jb-title { font-size: 2.6rem; }
+  .jb-step-title { font-size: 2rem; }
+  .jb-step-copy, .jb-lede { font-size: 1.1rem; }
+  .jb-tags { margin-bottom: 1.25rem; }
+}
