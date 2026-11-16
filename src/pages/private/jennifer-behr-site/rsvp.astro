@@ -1,0 +1,75 @@
+---
+// RSVP for the first showing of the Behr (class project prototype).
+// Static site with no backend: the form doesn't send or store anything yet.
+import BehrHead from "@/components/BehrHead.astro";
+import BehrFooter from "@/components/BehrFooter.astro";
+import { url } from "@/consts";
+---
+<!doctype html>
+<html lang="en">
+  <head><BehrHead title="RSVP · The Behr · Jennifer Behr (concept)" /></head>
+  <body class="jb-body">
+    <main class="jb-rsvp">
+      <header class="jb-head">
+        <a class="jb-mark" href={url("/private/jennifer-behr-site/")}>JENNIFER BEHR</a>
+        <span class="jb-sub">Atelier · Brooklyn · Est. 2005</span>
+      </header>
+      <section class="jb-rsvp-card">
+        <p class="jb-eyebrow">The Behr · First showing</p>
+        <h1 class="jb-title jb-title--sm">An evening in the studio.</h1>
+        <p class="jb-lede">
+          Before the Behr is seen anywhere else, it will be shown in person at our Brooklyn studio, alongside the wax models, the tools and the
+          hands that made it. Places are limited to fifty, one for each piece in the edition.
+        </p>
+        <form id="rsvp" class="jb-form" novalidate>
+          <label>Full name<input name="name" autocomplete="name" required /></label>
+          <label>Email<input name="email" type="email" autocomplete="email" required /></label>
+          <label>
+            You are
+            <select name="role" required>
+              <option value="" disabled selected>Choose one</option>
+              <option>A Jennifer Behr client</option>
+              <option>A bride-to-be</option>
+              <option>A stylist</option>
+              <option>An editor or journalist</option>
+              <option>A buyer</option>
+              <option>A collector</option>
+              <option>New to the atelier</option>
+            </select>
+          </label>
+          <fieldset>
+            <legend>Guests</legend>
+            <label class="jb-radio"><input type="radio" name="guests" value="1" checked /> Just me</label>
+            <label class="jb-radio"><input type="radio" name="guests" value="2" /> Me and one guest</label>
+          </fieldset>
+          <p id="rsvp-err" class="jb-err" role="alert"></p>
+          <button class="jb-btn" type="submit">Request an invitation</button>
+        </form>
+        <div id="rsvp-done" class="jb-done" hidden>
+          <p class="jb-eyebrow">Thank you</p>
+          <h2 class="jb-title jb-title--sm">You're on the list.</h2>
+          <p class="jb-lede">Invitations are written by hand and sent from the studio. We'll be in touch with the date.</p>
+          <a class="jb-link" href={url("/private/jennifer-behr-site/")}>Back to the Behr</a>
+        </div>
+      </section>
+    </main>
+    <BehrFooter />
+    <script>
+      // Prototype: validate and confirm on the page. Nothing is sent anywhere.
+      const form = document.getElementById("rsvp") as HTMLFormElement;
+      const err = document.getElementById("rsvp-err")!;
+      form.addEventListener("input", () => (err.textContent = ""));
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const bad = [...form.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[required]")].find((f) => !f.checkValidity());
+        if (bad) {
+          err.textContent = bad.name === "email" ? "Please enter a valid email." : "Please fill in every field.";
+          bad.focus();
+          return;
+        }
+        form.hidden = true;
+        document.getElementById("rsvp-done")!.hidden = false;
+      });
+    </script>
+  </body>
+</html>
