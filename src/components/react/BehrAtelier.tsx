@@ -179,6 +179,13 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
   const [shine, setShine] = useState(0);
   const [showNotes, setShowNotes] = useState(false);
   const deltaId = useRef(0);
+  const actionRef = useRef<HTMLButtonElement>(null);
+  // Keep keyboard focus on the step's button without scrolling the page.
+  useEffect(() => {
+    if (phase !== "play") return;
+    const t = setTimeout(() => actionRef.current?.focus({ preventScroll: true }), 450);
+    return () => clearTimeout(t);
+  }, [phase, step]);
 
   // Atelier hours, animated.
   const hoursTarget = useMemo(() => {
@@ -220,6 +227,10 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
     setStartedAt(null);
     setFinishedMs(null);
     hoursMV.set(0);
+    // Bring the game up under the sticky header so the corner counter sits beside it.
+    requestAnimationFrame(() =>
+      document.querySelector(".jb-product")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }),
+    );
   }
 
   function work() {
@@ -258,42 +269,64 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
   const bowDrop = 0;
   const waxColor = "#6d8a70";
 
+  const stepState = (i: number) => (phase === "done" || i < step ? "done" : phase === "play" && i === step ? "now" : "");
+
   return (
     <div className={`jb jb--${phase}`}>
-      <header className="jb-head">
-        <a className="jb-mark" href={shopHref} aria-label="Jennifer Behr: shop all">
-          JENNIFER BEHR
-        </a>
-        <span className="jb-sub">Atelier · Brooklyn · Est. 2005</span>
-      </header>
+      {/* Collection header, laid out like the shop's "Shop All" page */}
+      <section className="jb-coll">
+        <h1 className="jb-coll-title">The Behr</h1>
+        <p className="jb-coll-desc">
+          Our new hero necklace: a crystal collar and a sculpted bow, carved, cast, set and signed by hand in our Brooklyn studio. Make it
+          yourself, one step at a time, and watch the hours add up. Nothing here is for sale.
+        </p>
+      </section>
 
-      {/* Hours counter, top-right */}
+      <div className="jb-toolbar">
+        <div className="jb-toolbar-left">
+          <span className="jb-count">
+            {phase === "intro" ? `${STEPS.length} steps` : phase === "done" ? "Complete" : `Step ${step + 1} of ${STEPS.length}`}
+          </span>
+          <span className="jb-toolbar-sep" />
+          <span className="jb-toolbar-label">
+            <span aria-hidden="true">+</span> {phase === "play" ? cur.title : "How it's made"}
+          </span>
+        </div>
+        <div className="jb-toolbar-right">
+          <span className="jb-toolbar-label">Edition:</span> <span className="jb-count">50 pieces</span>
+        </div>
+      </div>
+
+      {/* Hours counter, fixed in the corner */}
       <AnimatePresence>
         {phase !== "intro" && (
-          <motion.aside
-            className="jb-hud"
-            aria-live="polite"
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-          >
-            <div className="jb-hud-label">Hours by hand</div>
-            <div className="jb-hud-total">{fmtHours(hoursShown)}</div>
+          <motion.aside className="jb-hud" aria-live="polite" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+            <div className="jb-hud-main">
+              <div className="jb-hud-label">Hours by hand</div>
+              <div className="jb-hud-total">{fmtHours(hoursShown)}</div>
+            </div>
             <div className="jb-hud-bar">
               <motion.span animate={{ scaleX: hoursShown / TOTAL_HOURS }} transition={{ duration: 0 }} />
             </div>
-            {phase === "play" && (
+            <div className="jb-hud-rows">
+              {phase === "play" && (
+                <div className="jb-hud-row">
+                  <span>This step</span>
+                  <span>
+                    {fmtHours(stepHoursDone)} / {cur.hours} h
+                  </span>
+                </div>
+              )}
               <div className="jb-hud-row">
-                <span>This step</span>
-                <span>
-                  {fmtHours(stepHoursDone)} / {cur.hours} h
-                </span>
+                <span>Your time</span>
+                <span>{fmtClock(yourMs)}</span>
               </div>
-            )}
-            <div className="jb-hud-row">
-              <span>Your time</span>
-              <span>{fmtClock(yourMs)}</span>
             </div>
+            {phase === "play" && (
+              <button className="jb-btn jb-btn--block jb-hud-action" onClick={work} aria-label={`${cur.verb} (step ${step + 1} of ${STEPS.length})`}>
+                {cur.id === "set" ? `${cur.verb} (${stonesSet}/${STONE_COUNT})` : cur.verb} <span aria-hidden="true">+</span>
+              </button>
+            )}
             <div className="jb-deltas" aria-hidden="true">
               <AnimatePresence>
                 {deltas.map((d) => (
@@ -301,7 +334,7 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
                     key={d.id}
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -14 }}
+                    exit={{ opacity: 0, y: -12 }}
                     transition={{ duration: 0.45 }}
                   >
                     {d.text}
@@ -313,14 +346,15 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
         )}
       </AnimatePresence>
 
-      {/* The necklace */}
-      <motion.div
-        className="jb-stage"
-        onClick={work}
-        role="presentation"
-        animate={{ scale: phase === "intro" ? 0.94 : 1 }}
-        transition={{ duration: 0.8 }}
-      >
+      {/* Product-page layout: image tile left, details right */}
+      <section className="jb-product">
+        <motion.div
+          className="jb-stage"
+          onClick={work}
+          role="presentation"
+          animate={{ scale: phase === "intro" ? 0.985 : 1 }}
+          transition={{ duration: 0.8 }}
+        >
         <svg viewBox="0 0 600 520" className="jb-svg" aria-label="The Behr necklace, in progress" role="img">
           <defs>
             <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
@@ -331,7 +365,7 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
             <radialGradient id="crystal" cx="0.35" cy="0.3" r="0.8">
               <stop offset="0" stopColor="#ffffff" />
               <stop offset="0.45" stopColor="#dfe9f2" />
-              <stop offset="1" stopColor="#8fa6bd" />
+              <stop offset="1" stopColor="#7f95ab" />
             </radialGradient>
             <radialGradient id="heat" cx="0.5" cy="0.5" r="0.5">
               <stop offset="0" stopColor="#ffb347" stopOpacity="0.9" />
@@ -339,7 +373,7 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
             </radialGradient>
             <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0" stopColor="#fff" stopOpacity="0" />
-              <stop offset="0.5" stopColor="#fff" stopOpacity="0.55" />
+              <stop offset="0.5" stopColor="#fff" stopOpacity="0.9" />
               <stop offset="1" stopColor="#fff" stopOpacity="0" />
             </linearGradient>
             <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
@@ -350,7 +384,7 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
           {/* The finished piece, faintly, behind the intro */}
           <motion.g
             fill="none"
-            stroke="#c9a24f"
+            stroke="#b4914a"
             strokeWidth="1"
             animate={{ opacity: phase === "intro" ? 0.5 : 0 }}
             transition={{ duration: 0.8 }}
@@ -366,7 +400,7 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
           </motion.g>
 
           {/* 1. Sketch */}
-          <g fill="none" stroke="#9d9384" strokeWidth="1.2" strokeDasharray="0" opacity={castP > 0 ? mix(0.6, 0.12, castP) : 0.75}>
+          <g fill="none" stroke="#8d877d" strokeWidth="1.2" strokeDasharray="0" opacity={castP > 0 ? mix(0.6, 0.12, castP) : 0.75}>
             <motion.path d={COLLAR} animate={{ pathLength: clamp01(sketchP * 2) }} transition={{ duration: 0.7 }} />
             {[BOW.left, BOW.right, BOW.tailL, BOW.tailR].map((d, i) => (
               <motion.path
@@ -480,7 +514,7 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
                 transition={spring}
                 style={{ transformOrigin: `${s.x}px ${s.y}px` }}
               >
-                <circle cx={s.x} cy={s.y} r={s.r + 1.2} fill="#b89545" />
+                <circle cx={s.x} cy={s.y} r={s.r + 1.3} fill="#a8853b" />
                 <circle cx={s.x} cy={s.y} r={s.r} fill="url(#crystal)" />
                 <circle cx={s.x - s.r * 0.35} cy={s.y - s.r * 0.35} r={Math.max(0.8, s.r * 0.22)} fill="#fff" />
               </motion.g>
@@ -521,7 +555,7 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
 
           {/* 6. Clasp detail */}
           <motion.g animate={{ opacity: step === 5 || (step === 6 && phase === "play") ? 1 : 0 }} transition={{ duration: 0.5 }}>
-            <circle cx="300" cy="460" r="44" fill="#111" stroke="#3a3a3a" />
+            <circle cx="300" cy="460" r="44" fill="#fff" stroke="#d6d6d6" />
             <motion.rect x="262" y="452" width="30" height="16" rx="8" fill="url(#gold)" animate={{ x: mix(258, 270, claspP) }} transition={spring} />
             <motion.rect x="308" y="452" width="30" height="16" rx="8" fill="url(#gold)" animate={{ x: mix(312, 300, claspP) }} transition={spring} />
             <motion.circle
@@ -529,7 +563,7 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
               cy="460"
               r="40"
               fill="none"
-              stroke="#f6e2a8"
+              stroke="#b4914a"
               style={{ transformOrigin: "300px 460px" }}
               initial={{ scale: 0.15, opacity: 0 }}
               animate={claspP >= 1 ? { scale: [0.15, 1], opacity: [0.9, 0] } : { scale: 0.15, opacity: 0 }}
@@ -548,7 +582,7 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
             width="160"
             height="420"
             fill="url(#sheen)"
-            style={{ mixBlendMode: "overlay" }}
+            style={{ mixBlendMode: "soft-light" }}
             initial={{ x: -200, opacity: 0 }}
             animate={shine ? { x: 700, opacity: [0, 1, 0] } : {}}
             transition={{ duration: 1.1, ease: "easeInOut" }}
@@ -564,134 +598,143 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
             Nº 01 of 50
           </motion.text>
         </svg>
-      </motion.div>
+        </motion.div>
 
-      {/* Intro */}
-      <AnimatePresence>
-        {phase === "intro" && (
-          <motion.section className="jb-intro" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.7 }}>
-            <p className="jb-eyebrow">A new piece from the atelier</p>
-            <h1 className="jb-title">Make the Behr.</h1>
-            <p className="jb-lede">
-              Our new hero necklace is made entirely by hand in our Brooklyn studio. Make it yourself, one step at a time, and watch the
-              hours add up.
-            </p>
-            <button className="jb-btn" onClick={begin} autoFocus>
-              Enter the atelier
-            </button>
-            <p className="jb-fine">About a minute of your time. {TOTAL_HOURS} hours of ours. Nothing here is for sale.</p>
-          </motion.section>
-        )}
-      </AnimatePresence>
+        <div className="jb-details">
+          <AnimatePresence mode="wait">
+            {phase === "intro" && (
+              <motion.div key="intro" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.5 }}>
+                <p className="jb-kicker">The Behr Necklace · Nº 01–50</p>
+                <h2 className="jb-display">Make the Behr.</h2>
+                <p className="jb-body">
+                  Eight steps, from a pencil drawing to an engraved edition number. Every click is time our atelier spends on a single piece.
+                </p>
+                <dl className="jb-specs">
+                  <div>
+                    <dt>Made in</dt>
+                    <dd>Brooklyn, New York</dd>
+                  </div>
+                  <div>
+                    <dt>Hours by hand</dt>
+                    <dd>{TOTAL_HOURS}</dd>
+                  </div>
+                  <div>
+                    <dt>Stones, set by hand</dt>
+                    <dd>{STONE_COUNT}</dd>
+                  </div>
+                </dl>
+                <button className="jb-btn" onClick={begin}>
+                  Begin <span aria-hidden="true">+</span>
+                </button>
+                <p className="jb-fine">About a minute of your time. {TOTAL_HOURS} hours of ours.</p>
+              </motion.div>
+            )}
 
-      {/* Step panel */}
-      <AnimatePresence mode="wait">
-        {phase === "play" && (
-          <motion.section
-            key={cur.id}
-            className="jb-panel"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.45 }}
-          >
-            <div className="jb-steps" aria-hidden="true">
-              {STEPS.map((s, i) => (
-                <span key={s.id} className={i < step ? "done" : i === step ? "now" : ""} />
-              ))}
-            </div>
-            <p className="jb-eyebrow">
-              Step {String(step + 1).padStart(2, "0")} of {String(STEPS.length).padStart(2, "0")} · {cur.hours} hours
-            </p>
-            <h2 className="jb-step-title">{cur.title}</h2>
-            <p className="jb-step-copy">{cur.copy}</p>
-            <ul className="jb-tags" aria-label="Frameworks">
-              {cur.tags.map((t) => (
-                <li key={t}>{t}</li>
-              ))}
-            </ul>
-            <div className="jb-action">
-              <motion.button className="jb-btn" onClick={work} whileTap={reduce ? undefined : { scale: 0.96 }} autoFocus>
-                {cur.id === "set" ? `${cur.verb} (${stonesSet}/${STONE_COUNT})` : cur.verb}
-              </motion.button>
-              <span className="jb-clicks">
-                {Array.from({ length: cur.clicks }).map((_, i) => (
-                  <i key={i} className={i < clicks ? "on" : ""} />
-                ))}
-              </span>
-            </div>
-          </motion.section>
-        )}
-      </AnimatePresence>
+            {phase === "play" && (
+              <motion.div key={cur.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.4 }}>
+                <p className="jb-kicker">
+                  Step {String(step + 1).padStart(2, "0")} · {cur.hours} hours
+                </p>
+                <h2 className="jb-display">{cur.title}</h2>
+                <p className="jb-body">{cur.copy}</p>
+                <ul className="jb-tags" aria-label="Frameworks">
+                  {cur.tags.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+                <div className="jb-action">
+                  <motion.button ref={actionRef} className="jb-btn" onClick={work} whileTap={reduce ? undefined : { scale: 0.97 }}>
+                    {cur.id === "set" ? `${cur.verb} (${stonesSet}/${STONE_COUNT})` : cur.verb} <span aria-hidden="true">+</span>
+                  </motion.button>
+                  <span className="jb-clicks" aria-label={`${clicks} of ${cur.clicks}`}>
+                    {Array.from({ length: cur.clicks }).map((_, i) => (
+                      <i key={i} className={i < clicks ? "on" : ""} />
+                    ))}
+                  </span>
+                </div>
+                <p className="jb-fine">Tip: you can also click the necklace.</p>
+              </motion.div>
+            )}
 
-      {/* Finale */}
-      <AnimatePresence>
-        {phase === "done" && (
-          <motion.section className="jb-final" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.3 }}>
-            <p className="jb-eyebrow">The Behr · Nº 01 of 50</p>
-            <h2 className="jb-title jb-title--sm">You made it in {fmtClock(yourMs)}.</h2>
-            <p className="jb-lede">
-              In our studio it takes <strong>{TOTAL_HOURS} hours</strong> of skilled hands: {STONE_COUNT} stones set one by one, a bow carved in
-              wax and cast in brass, a clasp we engineered ourselves. Fifty will be made.
-            </p>
-            <dl className="jb-stats">
-              <div>
-                <dt>Hours by hand</dt>
-                <dd>{TOTAL_HOURS}</dd>
+            {phase === "done" && (
+              <motion.div key="done" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
+                <p className="jb-kicker">The Behr · Nº 01 of 50</p>
+                <h2 className="jb-display">You made it in {fmtClock(yourMs)}.</h2>
+                <p className="jb-body">
+                  In our studio it takes {TOTAL_HOURS} hours of skilled hands: {STONE_COUNT} stones set one by one, a bow carved in wax and cast in
+                  brass, a clasp we engineered ourselves. Fifty will be made.
+                </p>
+                <p className="jb-body">The Behr will be shown first in person, at a private exhibition in our Brooklyn studio.</p>
+                <a className="jb-btn" href={rsvpHref}>
+                  RSVP for the first showing <span aria-hidden="true">+</span>
+                </a>
+                <div className="jb-final-links">
+                  <a className="jb-link" href={shopHref}>
+                    Explore the collection
+                  </a>
+                  <button className="jb-link" onClick={begin}>
+                    Make it again
+                  </button>
+                </div>
+                <button className="jb-notes-toggle" onClick={() => setShowNotes((v) => !v)} aria-expanded={showNotes}>
+                  {showNotes ? "Hide" : "Show"} the frameworks behind this page
+                </button>
+                <AnimatePresence>
+                  {showNotes && (
+                    <motion.div className="jb-notes" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+                      <p>
+                        <strong>Why a game.</strong> A nod to Hermès's 2011 website game: digital craftsmanship and cultural relevance without
+                        selling anything. There are no prices or carts on this page.
+                      </p>
+                      <p>
+                        <strong>Physical rarity → perceived rarity.</strong> The production side of the Luxury Business Model is strong at
+                        Jennifer Behr but invisible to the customer. Each step surfaces one element: IP and design, skilled labor, rare raw
+                        materials, a controlled supply chain, specialized tools, proprietary processes, the factory at its original location,
+                        and a limited collection.
+                      </p>
+                      <p>
+                        <strong>ASCEND.</strong> Art (the founder's sculpture training), design (the carved bow), science (materials) and
+                        engineering (the hair-magnet clasp) meet in one piece.
+                      </p>
+                      <p>
+                        <strong>AO Grid: Educate.</strong> Teaching the process moves visitors from novice toward expert. The RSVP turns that
+                        into an in-person showing for the people who carry the story.
+                      </p>
+                      <p className="jb-fine">Hours, materials and the edition size are illustrative assumptions for this prototype.</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
+
+      {/* The eight steps, as a product grid */}
+      <section className="jb-grid-wrap" aria-label="The making of the Behr">
+        <div className="jb-toolbar jb-toolbar--grid">
+          <div className="jb-toolbar-left">
+            <span className="jb-count">The making</span>
+          </div>
+          <div className="jb-toolbar-right">
+            <span className="jb-toolbar-label">Total:</span> <span className="jb-count">{TOTAL_HOURS} hours</span>
+          </div>
+        </div>
+        <ul className="jb-grid">
+          {STEPS.map((s, i) => (
+            <li key={s.id} className={`jb-card ${stepState(i)}`}>
+              <div className="jb-card-tile">
+                <span className="jb-card-num">{String(i + 1).padStart(2, "0")}</span>
+                <span className="jb-card-status">{stepState(i) === "done" ? "Done" : stepState(i) === "now" ? "In progress" : ""}</span>
               </div>
-              <div>
-                <dt>Stones set</dt>
-                <dd>{STONE_COUNT}</dd>
-              </div>
-              <div>
-                <dt>Edition</dt>
-                <dd>50</dd>
-              </div>
-            </dl>
-            <p className="jb-lede">
-              The Behr will be shown first in person, at a private exhibition in our Brooklyn studio.
-            </p>
-            <div className="jb-final-actions">
-              <a className="jb-btn" href={rsvpHref}>
-                RSVP for the first showing
-              </a>
-              <a className="jb-link" href={shopHref}>
-                Explore the collection
-              </a>
-              <button className="jb-link" onClick={begin}>
-                Make it again
-              </button>
-            </div>
-            <button className="jb-notes-toggle" onClick={() => setShowNotes((v) => !v)} aria-expanded={showNotes}>
-              {showNotes ? "Hide" : "Show"} the frameworks behind this page
-            </button>
-            <AnimatePresence>
-              {showNotes && (
-                <motion.div className="jb-notes" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
-                  <p>
-                    <strong>Why a game.</strong> A nod to Hermès's 2011 website game: digital craftsmanship and cultural relevance without selling
-                    anything. There are no prices or carts on this page.
-                  </p>
-                  <p>
-                    <strong>Physical rarity → perceived rarity.</strong> The production side of the Luxury Business Model is strong at Jennifer Behr
-                    but invisible to the customer. Each step surfaces one element: IP and design, skilled labor, rare raw materials, a controlled
-                    supply chain, specialized tools, proprietary processes, the factory at its original location, and a limited collection.
-                  </p>
-                  <p>
-                    <strong>ASCEND.</strong> Art (the founder's sculpture training), design (the carved bow), science (materials) and engineering (the
-                    hair-magnet clasp) meet in one piece.
-                  </p>
-                  <p>
-                    <strong>AO Grid: Educate.</strong> Teaching the process moves visitors from novice toward expert. The RSVP converts that into an
-                    in-person showing for the people who carry the story.
-                  </p>
-                  <p className="jb-fine">Hours, materials and the edition size are illustrative assumptions for this prototype.</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.section>
-        )}
-      </AnimatePresence>
+              <p className="jb-card-name">{s.title}</p>
+              <p className="jb-card-meta">
+                {s.hours} hours <span>{s.tags[0]}</span>
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

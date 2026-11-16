@@ -1,15 +1,19 @@
 ---
 // Jennifer Behr: "Make the Behr" landing page (class project prototype).
 import BehrHead from "@/components/BehrHead.astro";
+import BehrHeader from "@/components/BehrHeader.astro";
 import BehrFooter from "@/components/BehrFooter.astro";
 import BehrAtelier from "@/components/react/BehrAtelier";
 import { url } from "@/consts";
 ---
 <!doctype html>
 <html lang="en">
-  <head><BehrHead title="Make the Behr · Jennifer Behr (concept)" /></head>
+  <head><BehrHead title="The Behr – Jennifer Behr (concept)" /></head>
   <body class="jb-body">
-    <BehrAtelier client:load rsvpHref={url("/private/jennifer-behr-site/rsvp/")} shopHref="https://www.jenniferbehr.com/collections/shop-all" />
+    <BehrHeader />
+    <main>
+      <BehrAtelier client:load rsvpHref={url("/private/jennifer-behr-site/rsvp/")} shopHref="https://www.jenniferbehr.com/collections/shop-all" />
+    </main>
     <BehrFooter />
   </body>
 </html>

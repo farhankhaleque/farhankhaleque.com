@@ -1,3 +1,40 @@
-<footer class="jb-foot">
-  Student concept prototype for MKTG-UB Luxury Marketing, NYU Stern. Not affiliated with or endorsed by Jennifer Behr.
+---
+// Footer in the style of jenniferbehr.com.
+import { url } from "@/consts";
+const JB = "https://www.jenniferbehr.com";
+---
+<footer class="jb-footer">
+  <div class="jb-footer-cols">
+    <div>
+      <h3>The Behr</h3>
+      <a href={url("/private/jennifer-behr-site/")}>Make the Behr</a>
+      <a href={url("/private/jennifer-behr-site/rsvp/")}>First Showing</a>
+      <a href={`${JB}/collections/shop-all`}>Shop All</a>
+    </div>
+    <div>
+      <h3>Frameworks</h3>
+      <span>ASCEND</span>
+      <span>Luxury Business Model</span>
+      <span>AO Grid: Educate</span>
+      <span>Luxury Pyramid</span>
+    </div>
+    <div>
+      <h3>Follow Us</h3>
+      <a href="https://www.instagram.com/jenniferbehr/" rel="noopener" target="_blank">Instagram</a>
+      <a href={`${JB}/`} rel="noopener" target="_blank">jenniferbehr.com</a>
+    </div>
+    <div>
+      <h3>Project</h3>
+      <span>MKTG-UB Luxury Marketing</span>
+      <span>NYU Stern, Fall 2026</span>
+    </div>
+    <div class="jb-footer-signup">
+      <p>Be among the first fifty to see the Behr in person, at a private showing in our Brooklyn studio:</p>
+      <a class="jb-btn jb-btn--block" href={url("/private/jennifer-behr-site/rsvp/")}>Request an invitation</a>
+    </div>
+  </div>
+  <div class="jb-footer-legal">
+    <span>Student concept prototype. Not affiliated with or endorsed by Jennifer Behr LLC. Hours and materials are illustrative.</span>
+    <span>© 2026, Farhan Khaleque</span>
+  </div>
 </footer>

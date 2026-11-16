@@ -2,32 +2,30 @@
 // RSVP for the first showing of the Behr (class project prototype).
 // Static site with no backend: the form doesn't send or store anything yet.
 import BehrHead from "@/components/BehrHead.astro";
+import BehrHeader from "@/components/BehrHeader.astro";
 import BehrFooter from "@/components/BehrFooter.astro";
 import { url } from "@/consts";
 ---
 <!doctype html>
 <html lang="en">
-  <head><BehrHead title="RSVP · The Behr · Jennifer Behr (concept)" /></head>
+  <head><BehrHead title="First Showing – Jennifer Behr (concept)" /></head>
   <body class="jb-body">
+    <BehrHeader />
     <main class="jb-rsvp">
-      <header class="jb-head">
-        <a class="jb-mark" href={url("/private/jennifer-behr-site/")}>JENNIFER BEHR</a>
-        <span class="jb-sub">Atelier · Brooklyn · Est. 2005</span>
-      </header>
       <section class="jb-rsvp-card">
-        <p class="jb-eyebrow">The Behr · First showing</p>
-        <h1 class="jb-title jb-title--sm">An evening in the studio.</h1>
-        <p class="jb-lede">
+        <p class="jb-logo jb-logo--card">Jennifer&nbsp;&nbsp;Behr</p>
+        <h1 class="jb-display jb-display--center">An Evening<br />in the Studio</h1>
+        <p class="jb-body jb-center">
           Before the Behr is seen anywhere else, it will be shown in person at our Brooklyn studio, alongside the wax models, the tools and the
           hands that made it. Places are limited to fifty, one for each piece in the edition.
         </p>
         <form id="rsvp" class="jb-form" novalidate>
-          <label>Full name<input name="name" autocomplete="name" required /></label>
-          <label>Email<input name="email" type="email" autocomplete="email" required /></label>
+          <label><span class="jb-sr">Full name</span><input name="name" autocomplete="name" placeholder="FULL NAME" required /></label>
+          <label><span class="jb-sr">Email address</span><input name="email" type="email" autocomplete="email" placeholder="EMAIL ADDRESS" required /></label>
           <label>
-            You are
+            <span class="jb-q">Are you…</span>
             <select name="role" required>
-              <option value="" disabled selected>Choose one</option>
+              <option value="" disabled selected>Select one…</option>
               <option>A Jennifer Behr client</option>
               <option>A bride-to-be</option>
               <option>A stylist</option>
@@ -38,18 +36,18 @@ import { url } from "@/consts";
             </select>
           </label>
           <fieldset>
-            <legend>Guests</legend>
+            <legend class="jb-q">Guests</legend>
             <label class="jb-radio"><input type="radio" name="guests" value="1" checked /> Just me</label>
             <label class="jb-radio"><input type="radio" name="guests" value="2" /> Me and one guest</label>
           </fieldset>
           <p id="rsvp-err" class="jb-err" role="alert"></p>
-          <button class="jb-btn" type="submit">Request an invitation</button>
+          <button class="jb-btn jb-btn--block" type="submit">Request an invitation</button>
+          <p class="jb-fine jb-center">Prototype form: nothing you enter is sent or stored.</p>
         </form>
         <div id="rsvp-done" class="jb-done" hidden>
-          <p class="jb-eyebrow">Thank you</p>
-          <h2 class="jb-title jb-title--sm">You're on the list.</h2>
-          <p class="jb-lede">Invitations are written by hand and sent from the studio. We'll be in touch with the date.</p>
-          <a class="jb-link" href={url("/private/jennifer-behr-site/")}>Back to the Behr</a>
+          <h2 class="jb-display jb-display--center">You're on the List</h2>
+          <p class="jb-body jb-center">Invitations are written by hand and sent from the studio. We'll be in touch with the date.</p>
+          <p class="jb-center"><a class="jb-link" href={url("/private/jennifer-behr-site/")}>Back to the Behr</a></p>
         </div>
       </section>
     </main>
