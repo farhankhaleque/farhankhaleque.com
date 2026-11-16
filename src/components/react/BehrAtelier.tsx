@@ -5,6 +5,7 @@
 // Class project prototype (MKTG-UB Luxury Marketing). Hours are illustrative
 // estimates, not Jennifer Behr's real production data.
 import { useEffect, useMemo, useRef, useState } from "react";
+import HelperLayer, { type Helper, type Kind, type Prop } from "./BehrHelpers";
 import {
   AnimatePresence,
   animate,
@@ -150,6 +151,9 @@ export default function BehrAtelier({ rsvpHref, shopHref, assets }: { rsvpHref: 
   const [shine, setShine] = useState(0);
   const [showNotes, setShowNotes] = useState(false);
   const deltaId = useRef(0);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [helpers, setHelpers] = useState<Helper[]>([]);
+  const helperId = useRef(0);
   const actionRef = useRef<HTMLButtonElement>(null);
   // Keep keyboard focus on the step's button without scrolling the page.
   useEffect(() => {
@@ -204,6 +208,46 @@ export default function BehrAtelier({ rsvpHref, shopHref, assets }: { rsvpHref: 
     );
   }
 
+  // Which animal helps with each step, where on the necklace this click lands, and what it carries.
+  const HELPER_KIND: Kind[] = ["bear", "beaver", "magpie", "salamander", "mouse", "lobster", "squirrel", "owl"];
+  function helperTarget(si: number, n: number): { x: number; y: number; prop?: Prop } {
+    const id = STEPS[si].id;
+    if (id === "sketch") return { ...[{ x: 186, y: 230 }, { x: 414, y: 230 }, { x: 300, y: 32 }, { x: 300, y: 440 }][n - 1], prop: { kind: "pencil" } };
+    if (id === "wax") return { x: n % 2 ? 262 : 338, y: 440 + (n % 3) * 18, prop: { kind: "wax" } };
+    if (id === "source") {
+      const m = MATERIALS[n - 1];
+      return { x: m.x + m.w / 2, y: m.y + m.h / 2, prop: { kind: "img", href: assets + m.img, size: 26 } };
+    }
+    if (id === "cast") return { ...[{ x: 300, y: 450 }, { x: 186, y: 200 }, { x: 414, y: 200 }, { x: 300, y: 32 }][n - 1], prop: { kind: "flame" } };
+    if (id === "set") {
+      const count = Math.round((n / STEPS[si].clicks) * STONE_COUNT);
+      const st = STONES[SET_ORDER[Math.max(0, count - 1)]];
+      return { x: st.x, y: st.y, prop: { kind: "img", href: assets + st.img, size: 16 } };
+    }
+    if (id === "clasp") return { x: CLASP_AT.x, y: CLASP_AT.y };
+    if (id === "assemble") return { x: 300, y: 392, prop: { kind: "ring" } };
+    return { ...[{ x: 330, y: 470 }, { x: 236, y: 300 }, { x: 470, y: 520 }][n - 1], prop: { kind: "sparkle" } };
+  }
+  function sendHelper(si: number, n: number) {
+    if (reduce || !svgRef.current) return;
+    const r = svgRef.current.getBoundingClientRect();
+    const k = Math.min(r.width / 600, r.height / 560);
+    const ox = r.left + (r.width - 600 * k) / 2;
+    const oy = r.top + (r.height - 560 * k) / 2;
+    const t = helperTarget(si, n);
+    const dir: 1 | -1 = t.x < 290 ? 1 : t.x > 310 ? -1 : n % 2 ? 1 : -1;
+    const h: Helper = {
+      id: ++helperId.current,
+      kind: HELPER_KIND[si],
+      dir,
+      tx: ox + t.x * k,
+      ty: oy + t.y * k,
+      k: Math.max(0.62, Math.min(1.4, k * 1.25)),
+      prop: t.prop,
+    };
+    setHelpers((list) => [...list.slice(-5), h]);
+  }
+
   function work() {
     if (phase !== "play") return;
     const s = STEPS[step];
@@ -217,6 +261,7 @@ export default function BehrAtelier({ rsvpHref, shopHref, assets }: { rsvpHref: 
     if (s.id === "sign") setShine((n) => n + 1);
 
     const next = clicks + 1;
+    sendHelper(step, next);
     if (next < s.clicks) return setClicks(next);
     if (step < STEPS.length - 1) {
       setClicks(next);
@@ -325,7 +370,7 @@ export default function BehrAtelier({ rsvpHref, shopHref, assets }: { rsvpHref: 
           animate={{ scale: phase === "intro" ? 0.985 : 1 }}
           transition={{ duration: 0.8 }}
         >
-        <svg viewBox="0 0 600 560" className="jb-svg" aria-label="The Behr necklace, in progress" role="img">
+        <svg ref={svgRef} viewBox="0 0 600 560" className="jb-svg" aria-label="The Behr necklace, in progress" role="img">
           <defs>
             <radialGradient id="heat" cx="0.5" cy="0.5" r="0.5">
               <stop offset="0" stopColor="#ffb347" stopOpacity="0.85" />
@@ -683,6 +728,7 @@ export default function BehrAtelier({ rsvpHref, shopHref, assets }: { rsvpHref: 
           ))}
         </ul>
       </section>
+      <HelperLayer helpers={helpers} onDone={(id) => setHelpers((list) => list.filter((x) => x.id !== id))} />
     </div>
   );
 }
