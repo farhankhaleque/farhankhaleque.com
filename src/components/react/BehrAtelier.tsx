@@ -49,7 +49,7 @@ const STEPS: Step[] = [
     verb: "Choose a material",
     hours: 8,
     clicks: 4,
-    copy: "Reclaimed brass from a New York foundry, vintage crystal from twenty years of archive. We make only what we need.",
+    copy: "Gold chain from a New York maker, vintage crystal from twenty years of archive, hand-sorted brilliants. We make only what we need.",
     tags: ["ASCEND · Science", "Rare raw materials", "Controlled supply chain"],
   },
   {
@@ -76,7 +76,7 @@ const STEPS: Step[] = [
     verb: "Fit the magnet",
     hours: 5,
     clicks: 3,
-    copy: "The clasp borrows the magnet we engineered for our hair pieces: it closes with one hand and doesn't let go.",
+    copy: "A hand-finished clasp with a magnet inside, adapted from the one we engineered for our hair pieces. It closes with one hand.",
     tags: ["ASCEND · Engineering", "Proprietary process"],
   },
   {
@@ -102,54 +102,25 @@ const STEPS: Step[] = [
 const TOTAL_HOURS = STEPS.reduce((a, s) => a + s.hours, 0);
 const TOTAL_CLICKS = STEPS.reduce((a, s) => a + s.clicks, 0);
 
-// ---------- geometry ----------
-const P0 = { x: 110, y: 90 };
-const C = { x: 300, y: 390 };
-const P2 = { x: 490, y: 90 };
-const bez = (t: number) => ({
-  x: (1 - t) ** 2 * P0.x + 2 * (1 - t) * t * C.x + t ** 2 * P2.x,
-  y: (1 - t) ** 2 * P0.y + 2 * (1 - t) * t * C.y + t ** 2 * P2.y,
-});
-const COLLAR = `M${P0.x},${P0.y} Q${C.x},${C.y} ${P2.x},${P2.y}`;
-
-const COLLAR_STONES = Array.from({ length: 21 }, (_, i) => {
-  const t = 0.14 + (i / 20) * 0.72;
-  const near = 1 - Math.abs(t - 0.5) * 2; // 1 at the centre
-  return { ...bez(t), r: 3.6 + 4.2 * near ** 1.4 };
-}).filter((_, i) => i !== 10); // centre is where the bow hangs
-
-// Bow, centred at (300, 300).
-const BOW = {
-  left: "M300,300 C268,256 212,252 212,290 C212,326 268,320 300,300 Z",
-  right: "M300,300 C332,256 388,252 388,290 C388,326 332,320 300,300 Z",
-  tailL: "M295,307 C284,336 268,366 254,398 L273,394 L281,408 C290,374 298,340 303,309 Z",
-  tailR: "M305,307 C316,336 332,366 346,398 L327,394 L319,408 C310,374 302,340 297,309 Z",
-};
-const PAVE = (() => {
-  const pts: { x: number; y: number; r: number }[] = [];
-  for (const cx of [252, 348]) {
-    for (let i = 0; i < 11; i++) {
-      const a = (i / 11) * Math.PI * 2;
-      pts.push({ x: cx + Math.cos(a) * 24, y: 289 + Math.sin(a) * 12, r: 2.4 });
-    }
-    pts.push({ x: cx + (cx < 300 ? -2 : 2), y: 289, r: 3.4 });
-  }
-  pts.push({ x: 300, y: 296, r: 3 }, { x: 300, y: 306, r: 3 });
-  return pts;
-})();
-const STONES = [...COLLAR_STONES.map((s) => ({ ...s, kind: "collar" })), ...PAVE.map((s) => ({ ...s, kind: "pave" }))];
-// Set stones from the centre outwards, alternating sides, pavé last.
-const SET_ORDER = (() => {
-  const collar = COLLAR_STONES.map((s, i) => ({ i, d: Math.abs(s.x - 300) })).sort((a, b) => a.d - b.d).map((o) => o.i);
-  return [...collar, ...PAVE.map((_, j) => COLLAR_STONES.length + j)];
-})();
+// ---------- the piece, assembled from photographs ----------
+// Everything sits in a 600 x 560 box. Positions were measured from the cut-out photos
+// (see public/behr/CREDITS.md for sources).
+const CHAIN = { x: 176.3, y: 18, w: 247.4, h: 400 };
+const BOW = { x: 225, y: 378, w: 150, h: 175.7 };
+const CLASP_AT = { x: 294.8, y: 27.1 };
+// Pencil line traced along the chain photo, for the drawing step.
+const CHAIN_SKETCH = "M256.5,397.3 C255.9,396.1 254.5,392.4 253.2,390.0 C251.9,387.6 250.4,385.1 248.6,382.7 C246.8,380.3 244.4,377.8 242.4,375.4 C240.4,373.0 238.5,370.6 236.6,368.2 C234.7,365.8 232.8,363.3 231.0,360.9 C229.2,358.5 227.4,356.0 225.6,353.6 C223.8,351.2 222.1,348.7 220.4,346.3 C218.7,343.9 217.1,341.4 215.5,339.0 C213.9,336.6 212.3,334.1 210.8,331.7 C209.3,329.3 207.9,326.8 206.5,324.4 C205.1,322.0 203.8,319.5 202.6,317.1 C201.3,314.7 200.2,312.2 199.0,309.8 C197.8,307.4 196.7,304.9 195.7,302.5 C194.7,300.1 193.8,297.6 192.9,295.2 C192.0,292.8 191.1,290.3 190.3,287.9 C189.5,285.5 188.8,283.0 188.1,280.6 C187.4,278.2 186.8,275.7 186.2,273.3 C185.6,270.9 185.1,268.4 184.6,266.0 C184.1,263.6 183.8,261.1 183.4,258.7 C183.1,256.3 182.7,253.8 182.5,251.4 C182.3,249.0 182.2,246.5 182.1,244.1 C182.0,241.7 181.9,239.2 181.9,236.8 C181.9,234.4 181.9,232.0 181.9,229.6 C181.9,227.2 182.0,224.7 182.0,222.3 C182.0,219.9 182.1,217.4 182.1,215.0 C182.1,212.6 182.2,210.1 182.2,207.7 C182.2,205.3 182.2,202.8 182.2,200.4 C182.2,198.0 182.3,195.5 182.3,193.1 C182.3,190.7 182.3,188.2 182.4,185.8 C182.5,183.4 182.6,180.9 182.8,178.5 C183.0,176.1 183.2,173.6 183.5,171.2 C183.8,168.8 184.1,166.3 184.5,163.9 C184.9,161.5 185.4,159.0 186.0,156.6 C186.6,154.2 187.2,151.7 187.9,149.3 C188.6,146.9 189.4,144.4 190.3,142.0 C191.2,139.6 192.1,137.1 193.1,134.7 C194.1,132.3 195.2,129.8 196.2,127.4 C197.2,125.0 198.3,122.5 199.3,120.1 C200.3,117.7 201.3,115.2 202.3,112.8 C203.3,110.4 204.2,107.9 205.3,105.5 C206.4,103.1 207.4,100.6 208.6,98.2 C209.8,95.8 211.1,93.3 212.4,90.9 C213.8,88.5 215.2,86.1 216.7,83.7 C218.2,81.3 219.8,78.8 221.6,76.4 C223.3,74.0 225.1,71.5 227.2,69.1 C229.3,66.7 231.5,64.2 234.0,61.8 C236.5,59.4 238.7,56.9 242.0,54.5 C245.3,52.1 250.2,49.6 253.9,47.2 C257.6,44.8 261.0,42.3 264.0,39.9 C267.0,37.5 266.7,35.2 271.8,32.6 C276.9,30.0 288.3,24.1 294.8,24.1 C301.3,24.1 306.9,30.0 310.7,32.6 C314.5,35.2 314.9,37.5 317.5,39.9 C320.1,42.3 323.0,44.8 326.3,47.2 C329.6,49.6 334.0,52.1 337.4,54.5 C340.8,56.9 343.8,59.4 346.7,61.8 C349.6,64.2 352.2,66.7 354.7,69.1 C357.2,71.5 359.4,74.0 361.6,76.4 C363.8,78.8 366.0,81.3 368.0,83.7 C370.0,86.1 371.9,88.5 373.8,90.9 C375.7,93.3 377.4,95.8 379.1,98.2 C380.8,100.6 382.4,103.1 384.0,105.5 C385.6,107.9 387.1,110.4 388.5,112.8 C389.9,115.2 391.3,117.7 392.6,120.1 C393.9,122.5 395.2,125.0 396.3,127.4 C397.4,129.8 398.5,132.3 399.5,134.7 C400.5,137.1 401.5,139.6 402.4,142.0 C403.3,144.4 404.2,146.9 405.0,149.3 C405.8,151.7 406.6,154.2 407.3,156.6 C408.0,159.0 408.7,161.5 409.3,163.9 C409.9,166.3 410.6,168.8 411.1,171.2 C411.7,173.6 412.1,176.1 412.6,178.5 C413.1,180.9 413.5,183.4 413.9,185.8 C414.3,188.2 414.7,190.7 415.0,193.1 C415.3,195.5 415.6,198.0 415.9,200.4 C416.1,202.8 416.3,205.3 416.5,207.7 C416.7,210.1 416.9,212.6 417.0,215.0 C417.1,217.4 417.3,219.9 417.4,222.3 C417.5,224.7 417.4,227.2 417.4,229.6 C417.4,232.0 417.5,234.4 417.4,236.8 C417.3,239.2 417.2,241.7 417.0,244.1 C416.8,246.5 416.6,249.0 416.4,251.4 C416.2,253.8 415.9,256.3 415.6,258.7 C415.3,261.1 414.9,263.6 414.5,266.0 C414.1,268.4 413.8,270.9 413.4,273.3 C413.0,275.7 412.5,278.2 411.9,280.6 C411.3,283.0 410.6,285.5 410.0,287.9 C409.4,290.3 408.7,292.8 408.0,295.2 C407.3,297.6 406.6,300.1 405.8,302.5 C405.0,304.9 404.2,307.4 403.3,309.8 C402.4,312.2 401.5,314.7 400.5,317.1 C399.5,319.5 398.6,322.0 397.5,324.4 C396.4,326.8 395.3,329.3 394.2,331.7 C393.1,334.1 391.9,336.6 390.7,339.0 C389.5,341.4 388.2,343.9 386.9,346.3 C385.6,348.7 384.1,351.2 382.7,353.6 C381.3,356.0 379.9,358.5 378.4,360.9 C376.9,363.3 375.3,365.8 373.7,368.2 C372.1,370.6 370.4,373.0 368.6,375.4 C366.8,377.8 364.9,380.3 362.8,382.7 C360.8,385.1 358.6,387.6 356.3,390.0 C354.0,392.4 351.2,394.9 348.9,397.3 C346.6,399.7 344.4,402.2 342.7,404.6 C341.0,407.0 339.2,410.7 338.5,411.9";
+// Crystals sit on the chain's real curve, growing toward the bow.
+const STONES = [{"x": 186.7, "y": 149.3, "r": 6.0}, {"x": 182.8, "y": 176.8, "r": 6.6}, {"x": 182.2, "y": 204.6, "r": 7.2}, {"x": 181.9, "y": 232.3, "r": 7.8}, {"x": 183.5, "y": 260.0, "r": 8.4}, {"x": 189.9, "y": 287.0, "r": 9.1}, {"x": 200.3, "y": 312.8, "r": 9.7}, {"x": 214.1, "y": 336.9, "r": 10.3}, {"x": 230.0, "y": 359.6, "r": 10.9}, {"x": 245.0, "y": 382.7, "r": 11.5}, {"x": 406.4, "y": 149.3, "r": 6.0}, {"x": 412.1, "y": 175.9, "r": 6.6}, {"x": 416.1, "y": 202.9, "r": 7.2}, {"x": 417.5, "y": 230.1, "r": 7.8}, {"x": 415.8, "y": 257.3, "r": 8.4}, {"x": 411.1, "y": 284.1, "r": 9.1}, {"x": 403.2, "y": 310.2, "r": 9.7}, {"x": 392.5, "y": 335.3, "r": 10.3}, {"x": 379.4, "y": 359.2, "r": 10.9}, {"x": 366.1, "y": 382.7, "r": 11.5}].map((st, i) => ({ ...st, img: `stone-${"abc"[i % 3]}.webp` }));
+// Set from the bow outwards, alternating sides.
+const SET_ORDER = STONES.map((st, i) => ({ i, d: -st.y })).sort((p, q) => p.d - q.d).map((o) => o.i);
 const STONE_COUNT = STONES.length;
 
 const MATERIALS = [
-  { label: "Reclaimed brass", sub: "New York", color: "url(#gold)", shape: "bar" },
-  { label: "Vintage crystal", sub: "From the archive", color: "url(#crystal)", shape: "gem" },
-  { label: "Sterling wire", sub: "For the prongs", color: "#cfd3d6", shape: "wire" },
-  { label: "Magnet", sub: "Our own design", color: "#3a3a3a", shape: "magnet" },
+  { label: "Gold chain", sub: "From a New York maker", img: "bench-chain.webp", x: 30, y: 60, w: 140, h: 125, blend: false },
+  { label: "Vintage crystal", sub: "From twenty years of archive", img: "bench-stones.webp", x: 22, y: 270, w: 156, h: 126, blend: true },
+  { label: "Round brilliants", sub: "Sorted by hand", img: "bench-brilliant.webp", x: 457, y: 70, w: 96, h: 96, blend: false },
+  { label: "The clasp", sub: "Fitted with a magnet", img: "clasp.webp", x: 450, y: 280, w: 110, h: 110, blend: false },
 ];
 
 // ---------- helpers ----------
@@ -167,7 +138,7 @@ const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 
 type Phase = "intro" | "play" | "done";
 
-export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; shopHref: string }) {
+export default function BehrAtelier({ rsvpHref, shopHref, assets }: { rsvpHref: string; shopHref: string; assets: string }) {
   const reduce = useReducedMotion();
   const [phase, setPhase] = useState<Phase>("intro");
   const [step, setStep] = useState(0);
@@ -266,7 +237,6 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
   const yourMs = finishedMs ?? (startedAt ? now - startedAt : 0);
   const spring = reduce ? { duration: 0 } : { type: "spring" as const, stiffness: 260, damping: 18 };
 
-  const bowDrop = 0;
   const waxColor = "#6d8a70";
 
   const stepState = (i: number) => (phase === "done" || i < step ? "done" : phase === "play" && i === step ? "now" : "");
@@ -355,197 +325,164 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
           animate={{ scale: phase === "intro" ? 0.985 : 1 }}
           transition={{ duration: 0.8 }}
         >
-        <svg viewBox="0 0 600 520" className="jb-svg" aria-label="The Behr necklace, in progress" role="img">
+        <svg viewBox="0 0 600 560" className="jb-svg" aria-label="The Behr necklace, in progress" role="img">
           <defs>
-            <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#f6e2a8" />
-              <stop offset="0.45" stopColor="#c9a24f" />
-              <stop offset="1" stopColor="#8a6a2c" />
-            </linearGradient>
-            <radialGradient id="crystal" cx="0.35" cy="0.3" r="0.8">
-              <stop offset="0" stopColor="#ffffff" />
-              <stop offset="0.45" stopColor="#dfe9f2" />
-              <stop offset="1" stopColor="#7f95ab" />
-            </radialGradient>
             <radialGradient id="heat" cx="0.5" cy="0.5" r="0.5">
-              <stop offset="0" stopColor="#ffb347" stopOpacity="0.9" />
+              <stop offset="0" stopColor="#ffb347" stopOpacity="0.85" />
               <stop offset="1" stopColor="#ff6a00" stopOpacity="0" />
             </radialGradient>
             <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0" stopColor="#fff" stopOpacity="0" />
-              <stop offset="0.5" stopColor="#fff" stopOpacity="0.9" />
+              <stop offset="0.5" stopColor="#fff" stopOpacity="0.85" />
               <stop offset="1" stopColor="#fff" stopOpacity="0" />
             </linearGradient>
             <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="6" />
+              <feGaussianBlur stdDeviation="10" />
             </filter>
-          </defs>
-
-          {/* The finished piece, faintly, behind the intro */}
-          <motion.g
-            fill="none"
-            stroke="#b4914a"
-            strokeWidth="1"
-            animate={{ opacity: phase === "intro" ? 0.5 : 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <path d={COLLAR} />
-            {[BOW.left, BOW.right, BOW.tailL, BOW.tailR].map((d, i) => (
-              <path key={i} d={d} />
-            ))}
-            <rect x="287" y="287" width="26" height="28" rx="9" />
-            {COLLAR_STONES.map((c, i) => (
-              <circle key={i} cx={c.x} cy={c.y} r={c.r} />
-            ))}
-          </motion.g>
-
-          {/* 1. Sketch */}
-          <g fill="none" stroke="#8d877d" strokeWidth="1.2" strokeDasharray="0" opacity={castP > 0 ? mix(0.6, 0.12, castP) : 0.75}>
-            <motion.path d={COLLAR} animate={{ pathLength: clamp01(sketchP * 2) }} transition={{ duration: 0.7 }} />
-            {[BOW.left, BOW.right, BOW.tailL, BOW.tailR].map((d, i) => (
-              <motion.path
-                key={i}
-                d={d}
-                animate={{ pathLength: clamp01(sketchP * 2 - 0.5 - i * 0.12) * 1.6 }}
+            {/* the chain is revealed top to bottom as it is cast */}
+            <clipPath id="castClip">
+              <motion.rect x="0" y="0" width="600" initial={false} animate={{ height: castP * 560 }} transition={{ duration: 0.8 }} />
+            </clipPath>
+            {/* the bow drawing wipes in as it is drawn */}
+            <clipPath id="sketchClip">
+              <motion.rect
+                x="0"
+                y="0"
+                width="600"
+                initial={false}
+                animate={{ height: phase === "intro" ? 560 : clamp01(sketchP * 1.7 - 0.5) * 560 }}
                 transition={{ duration: 0.7 }}
               />
-            ))}
-          </g>
+            </clipPath>
+          </defs>
+          {/* tile colour inside the SVG so multiplied photos blend into it */}
+          <rect width="600" height="560" fill="#f6f6f6" />
 
-          {/* 4. Cast chain */}
-          <motion.path
-            d={COLLAR}
-            fill="none"
-            stroke="url(#gold)"
-            strokeWidth="3.2"
-            strokeLinecap="round"
-            animate={{ pathLength: castP, opacity: castP > 0 ? 1 : 0 }}
-            transition={{ duration: 0.8 }}
-          />
-
-          {/* Bow: wax, then brass */}
-          <motion.g
-            key={step === 6 ? `swing-${clicks}` : "still"}
-            style={{ transformOrigin: "300px 256px" }}
-            animate={step === 6 && clicks > 0 && !reduce ? { rotate: [0, -5, 3.5, -1.5, 0] } : { rotate: 0 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-          >
-            {/* heat while casting */}
-            <motion.ellipse
-              cx="300"
-              cy="320"
-              rx="120"
-              ry="90"
-              fill="url(#heat)"
-              filter="url(#soft)"
-              animate={{ opacity: step === 3 && phase === "play" ? Math.sin(Math.PI * clamp01(castP)) * 0.9 + 0.1 * (castP < 1 ? 1 : 0) : 0 }}
-              transition={{ duration: 0.6 }}
+          {/* 1. Pencil drawing (also the faint preview on the intro) */}
+          <motion.g initial={false} animate={{ opacity: phase === "intro" ? 0.55 : castP > 0 ? mix(0.8, 0, castP) : 0.9 }} transition={{ duration: 0.6 }}>
+            <motion.path
+              d={CHAIN_SKETCH}
+              fill="none"
+              stroke="#6d675e"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+              initial={false}
+              animate={{ pathLength: phase === "intro" ? 1 : clamp01(sketchP * 2) }}
+              transition={{ duration: 0.7 }}
             />
-            <g style={{ transformOrigin: "300px 300px" }}>
-              {[BOW.tailL, BOW.tailR, BOW.left, BOW.right].map((d, i) => (
-                <g key={i}>
-                  <motion.path
-                    d={d}
-                    fill={waxColor}
-                    animate={{ opacity: waxP * (1 - castP), scale: 0.9 + 0.1 * waxP }}
-                    style={{ transformOrigin: "300px 300px" }}
-                    transition={{ duration: 0.6 }}
-                  />
-                  <motion.path
-                    d={d}
-                    fill="url(#gold)"
-                    stroke="#7a5c22"
-                    strokeWidth="0.8"
-                    animate={{ opacity: castP }}
-                    transition={{ duration: 0.8 }}
-                  />
-                </g>
-              ))}
-              {/* knot */}
-              <motion.rect x="287" y="287" width="26" height="28" rx="9" fill={waxColor} animate={{ opacity: waxP * (1 - castP) }} />
-              <motion.rect
-                x="287"
-                y="287"
-                width="26"
-                height="28"
-                rx="9"
-                fill="url(#gold)"
-                stroke="#7a5c22"
-                strokeWidth="0.8"
-                animate={{ opacity: castP }}
-              />
-              {/* carving shavings */}
-              {step === 1 &&
-                Array.from({ length: clicks }).map((_, i) => (
-                  <motion.circle
-                    key={i}
-                    r="2"
-                    fill={waxColor}
-                    initial={{ cx: 300, cy: 300, opacity: 1 }}
-                    animate={{ cx: 300 + (i % 2 ? 1 : -1) * (60 + i * 18), cy: 380 + i * 6, opacity: 0 }}
-                    transition={{ duration: 0.9 }}
-                  />
-                ))}
+            <g clipPath="url(#sketchClip)">
+              <image href={assets + "bow-sketch.webp"} x={BOW.x} y={BOW.y} width={BOW.w} height={BOW.h} />
             </g>
           </motion.g>
 
-          {/* 7. Jump ring joining bow to collar */}
+          {/* 4. The gold chain, revealed as it is cast */}
+          <g clipPath="url(#castClip)">
+            <image href={assets + "chain.webp"} x={CHAIN.x} y={CHAIN.y} width={CHAIN.w} height={CHAIN.h} />
+          </g>
+
+          {/* 6. Clasp: a ring around the real clasp on the chain */}
           <motion.circle
-            cx="300"
-            cy="256"
-            r="7"
+            cx={CLASP_AT.x}
+            cy={CLASP_AT.y}
+            r="16"
             fill="none"
-            stroke="url(#gold)"
-            strokeWidth="3"
-            animate={{ opacity: assembleP > 0 ? 1 : 0, scale: assembleP > 0 ? 1 : 0.3 }}
-            style={{ transformOrigin: "300px 256px" }}
-            transition={spring}
+            stroke="#a8853b"
+            strokeWidth="1.2"
+            initial={false}
+            animate={{ opacity: step === 5 && phase === "play" ? 1 : 0, scale: claspP >= 1 ? [1, 1.6, 1] : 1 }}
+            style={{ transformOrigin: `${CLASP_AT.x}px ${CLASP_AT.y}px` }}
+            transition={{ duration: 0.8 }}
           />
 
-          {/* 5. Stones (bow pavé moves with the bow) */}
-          {STONES.map((s, i) => {
+          {/* 5. Crystals, set one by one along the chain */}
+          {STONES.map((st, i) => {
             const on = setIds.has(i);
-            const dy = s.kind === "pave" ? bowDrop : 0;
             return (
               <motion.g
                 key={i}
                 initial={false}
-                animate={{ opacity: on ? 1 : 0, scale: on ? 1 : 0.2, y: dy }}
+                animate={{ opacity: on ? 1 : 0, scale: on ? 1 : 0.2 }}
                 transition={spring}
-                style={{ transformOrigin: `${s.x}px ${s.y}px` }}
+                style={{ transformOrigin: `${st.x}px ${st.y}px` }}
               >
-                <circle cx={s.x} cy={s.y} r={s.r + 1.3} fill="#a8853b" />
-                <circle cx={s.x} cy={s.y} r={s.r} fill="url(#crystal)" />
-                <circle cx={s.x - s.r * 0.35} cy={s.y - s.r * 0.35} r={Math.max(0.8, s.r * 0.22)} fill="#fff" />
+                <circle cx={st.x} cy={st.y} r={st.r + 1.4} fill="#c3a05c" />
+                <image href={assets + st.img} x={st.x - st.r} y={st.y - st.r} width={st.r * 2} height={st.r * 2} />
               </motion.g>
             );
           })}
 
+          {/* The bow: drawn, carved in wax, cast in gold, then joined (swings) */}
+          <motion.g
+            key={step === 6 ? `swing-${clicks}` : "still"}
+            style={{ transformOrigin: `${BOW.x + BOW.w / 2}px ${BOW.y + 10}px` }}
+            animate={step === 6 && clicks > 0 && !reduce ? { rotate: [0, -5, 3.5, -1.5, 0] } : { rotate: 0 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+          >
+            <motion.ellipse
+              cx={BOW.x + BOW.w / 2}
+              cy={BOW.y + BOW.h / 2}
+              rx="110"
+              ry="90"
+              fill="url(#heat)"
+              filter="url(#soft)"
+              initial={false}
+              animate={{ opacity: step === 3 && phase === "play" ? Math.sin(Math.PI * clamp01(castP)) * 0.9 + 0.1 * (castP < 1 ? 1 : 0) : 0 }}
+              transition={{ duration: 0.6 }}
+            />
+            <motion.image
+              href={assets + "bow-wax.webp"}
+              x={BOW.x}
+              y={BOW.y}
+              width={BOW.w}
+              height={BOW.h}
+              initial={false}
+              animate={{ opacity: waxP * (1 - castP), scale: 0.92 + 0.08 * waxP }}
+              style={{ transformOrigin: `${BOW.x + BOW.w / 2}px ${BOW.y + BOW.h / 2}px` }}
+              transition={{ duration: 0.6 }}
+            />
+            <motion.image
+              href={assets + "bow.webp"}
+              x={BOW.x}
+              y={BOW.y}
+              width={BOW.w}
+              height={BOW.h}
+              initial={false}
+              animate={{ opacity: castP }}
+              transition={{ duration: 0.8 }}
+            />
+            {/* wax shavings while carving */}
+            {step === 1 &&
+              Array.from({ length: clicks }).map((_, i) => (
+                <motion.circle
+                  key={i}
+                  r="2.2"
+                  fill="#6f8f72"
+                  initial={{ cx: 300, cy: 460, opacity: 1 }}
+                  animate={{ cx: 300 + (i % 2 ? 1 : -1) * (70 + i * 16), cy: 540, opacity: 0 }}
+                  transition={{ duration: 0.9 }}
+                />
+              ))}
+          </motion.g>
+
           {/* 3. Materials on the bench */}
-          <motion.g animate={{ opacity: step >= 2 && castP < 1 ? 1 : 0 }} transition={{ duration: 0.6 }}>
+          <motion.g initial={false} animate={{ opacity: step >= 2 && castP < 1 && phase === "play" ? 1 : 0 }} transition={{ duration: 0.6 }}>
             {MATERIALS.map((m, i) => {
               const shown = sourceP * MATERIALS.length > i;
-              const x = 120 + i * 120;
-              const y = 462;
               return (
-                <motion.g
-                  key={m.label}
-                  initial={false}
-                  animate={{ opacity: shown ? 1 : 0, y: shown ? 0 : 12 }}
-                  transition={spring}
-                >
-                  {m.shape === "bar" && <rect x={x - 18} y={y - 10} width="36" height="14" rx="2" fill={m.color} />}
-                  {m.shape === "gem" && <polygon points={`${x},${y - 14} ${x + 12},${y - 3} ${x},${y + 6} ${x - 12},${y - 3}`} fill={m.color} />}
-                  {m.shape === "wire" && (
-                    <path d={`M${x - 16},${y} C${x - 8},${y - 16} ${x + 8},${y + 12} ${x + 16},${y - 4}`} stroke={m.color} strokeWidth="2" fill="none" />
-                  )}
-                  {m.shape === "magnet" && (
-                    <path d={`M${x - 10},${y - 12} v12 a10,10 0 0 0 20,0 v-12 h-6 v12 a4,4 0 0 1 -8,0 v-12 Z`} fill="#555" />
-                  )}
-                  <text x={x} y={y + 24} className="jb-svg-label" textAnchor="middle">
+                <motion.g key={m.label} initial={false} animate={{ opacity: shown ? 1 : 0, y: shown ? 0 : 12 }} transition={spring}>
+                  <image
+                    href={assets + m.img}
+                    x={m.x}
+                    y={m.y}
+                    width={m.w}
+                    height={m.h}
+                    preserveAspectRatio="xMidYMid meet"
+                    style={m.blend ? { mixBlendMode: "multiply" } : undefined}
+                  />
+                  <text x={m.x + m.w / 2} y={m.y + m.h + 20} className="jb-svg-label" textAnchor="middle">
                     {m.label}
                   </text>
-                  <text x={x} y={y + 37} className="jb-svg-sub" textAnchor="middle">
+                  <text x={m.x + m.w / 2} y={m.y + m.h + 34} className="jb-svg-sub" textAnchor="middle">
                     {m.sub}
                   </text>
                 </motion.g>
@@ -553,23 +490,23 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
             })}
           </motion.g>
 
-          {/* 6. Clasp detail */}
-          <motion.g animate={{ opacity: step === 5 || (step === 6 && phase === "play") ? 1 : 0 }} transition={{ duration: 0.5 }}>
-            <circle cx="300" cy="460" r="44" fill="#fff" stroke="#d6d6d6" />
-            <motion.rect x="262" y="452" width="30" height="16" rx="8" fill="url(#gold)" animate={{ x: mix(258, 270, claspP) }} transition={spring} />
-            <motion.rect x="308" y="452" width="30" height="16" rx="8" fill="url(#gold)" animate={{ x: mix(312, 300, claspP) }} transition={spring} />
+          {/* 6. Clasp close-up (photo) */}
+          <motion.g initial={false} animate={{ opacity: step === 5 && phase === "play" ? 1 : 0 }} transition={{ duration: 0.5 }}>
+            <line x1={CLASP_AT.x + 14} y1={CLASP_AT.y + 6} x2="455" y2="95" stroke="#b9b9b9" strokeWidth="0.8" />
+            <circle cx="510" cy="150" r="64" fill="#fff" stroke="#d6d6d6" />
+            <image href={assets + "clasp.webp"} x="450" y="90" width="120" height="120" />
             <motion.circle
-              cx="300"
-              cy="460"
-              r="40"
+              cx="510"
+              cy="150"
+              r="64"
               fill="none"
-              stroke="#b4914a"
-              style={{ transformOrigin: "300px 460px" }}
-              initial={{ scale: 0.15, opacity: 0 }}
-              animate={claspP >= 1 ? { scale: [0.15, 1], opacity: [0.9, 0] } : { scale: 0.15, opacity: 0 }}
+              stroke="#a8853b"
+              style={{ transformOrigin: "510px 150px" }}
+              initial={false}
+              animate={claspP >= 1 ? { scale: [1, 1.25], opacity: [0.9, 0] } : { scale: 1, opacity: 0 }}
               transition={{ duration: 0.8 }}
             />
-            <text x="300" y="518" className="jb-svg-sub" textAnchor="middle">
+            <text x="510" y="236" className="jb-svg-sub" textAnchor="middle">
               the clasp, close up
             </text>
           </motion.g>
@@ -578,20 +515,21 @@ export default function BehrAtelier({ rsvpHref, shopHref }: { rsvpHref: string; 
           <motion.rect
             key={shine}
             x="-200"
-            y="40"
-            width="160"
-            height="420"
+            y="0"
+            width="180"
+            height="560"
             fill="url(#sheen)"
             style={{ mixBlendMode: "soft-light" }}
             initial={{ x: -200, opacity: 0 }}
-            animate={shine ? { x: 700, opacity: [0, 1, 0] } : {}}
+            animate={shine ? { x: 720, opacity: [0, 1, 0] } : {}}
             transition={{ duration: 1.1, ease: "easeInOut" }}
           />
           <motion.text
-            x="300"
-            y="438"
-            textAnchor="middle"
+            x="574"
+            y="540"
+            textAnchor="end"
             className="jb-svg-edition"
+            initial={false}
             animate={{ opacity: signP >= 1 ? 1 : 0, y: signP >= 1 ? 0 : 6 }}
             transition={{ duration: 0.9, delay: 0.2 }}
           >

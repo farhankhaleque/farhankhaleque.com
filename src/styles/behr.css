@@ -148,6 +148,8 @@ body.jb-body { margin: 0; background: var(--jb-bg); color: var(--jb-text); font-
 .jb-footer-cols a.jb-btn:hover { text-decoration: none; }
 .jb-footer-signup p { font-family: var(--jb-serif); font-size: 17px; line-height: 19px; color: var(--jb-ink); margin: 0 0 28px; max-width: 400px; }
 .jb-footer-signup .jb-btn { max-width: 405px; }
+.jb-credits { flex-basis: 100%; color: var(--jb-mute); font-size: 12px; }
+.jb-credits a { text-decoration: underline; text-underline-offset: 2px; }
 .jb-footer-legal { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-top: 1px solid #d4d4d4; padding: 20px var(--jb-gutter) 0; margin: 0 calc(-1 * var(--jb-gutter)); color: var(--jb-text); }
 
 /* ---------- RSVP (modelled on the shop's sign-up modal) ---------- */
