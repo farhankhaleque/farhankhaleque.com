@@ -232,7 +232,8 @@ const Paths = ({ paths }: { paths: PathInfo[] }) => (
 export type Helper = {
   id: number;
   kind: Kind;
-  dir: 1 | -1; // 1 = walks in from the left, facing right
+  dir: 1 | -1; // which way it faces: 1 = right
+  from: "left" | "right" | "top" | "bottom"; // left/right: walks across; top: lowered on a thread and pulled back up; bottom: hops up and drops back down
   tx: number; // target, in viewport px
   ty: number;
   k: number; // scale
@@ -240,6 +241,14 @@ export type Helper = {
 };
 
 const DURATION = 2.5;
+
+// A slightly wobbly vertical line, re-drawn each boil frame.
+function threadPath(len: number, frame: number) {
+  const f = frame % FRAMES;
+  let d = `M3 0`;
+  for (let y = 40; y <= len; y += 40) d += ` L${3 + Math.sin(y * 0.05 + f * 1.7) * 1.2} ${y}`;
+  return d;
+}
 
 function HelperSprite({ h, frame, onDone }: { h: Helper; frame: number; onDone: (id: number) => void }) {
   const a = ANIMALS[h.kind];
@@ -251,30 +260,62 @@ function HelperSprite({ h, frame, onDone }: { h: Helper; frame: number; onDone: 
   const W = 120 * h.k;
   const H = 100 * h.k;
   const vw = typeof window !== "undefined" ? window.innerWidth : 1440;
-  // Put the animal's mouth (where it holds things) on the target.
-  const mouthX = h.dir === 1 ? a.mouth.x : 120 - a.mouth.x;
-  const arrive = h.tx - mouthX * h.k;
-  const start = h.dir === 1 ? -W - 20 : vw + 20;
-  const exit = h.dir === 1 ? vw + 20 : -W - 20;
-  const top = h.ty - a.mouth.y * h.k;
+  const vh = typeof window !== "undefined" ? window.innerHeight : 900;
+  // Orientation follows the entrance: facing right from the left, flipped from the right,
+  // head-down when lowered from the top, head-up when climbing in from the bottom.
+  const flip = h.from === "right";
+  const rot = h.from === "top" ? 90 : h.from === "bottom" ? -90 : 0;
+  // Where the mouth ends up in the 120 x 100 box after the flip / rotation (about the centre).
+  const m0 = { x: flip ? 120 - a.mouth.x : a.mouth.x, y: a.mouth.y };
+  const r = (rot * Math.PI) / 180;
+  const mouth = {
+    x: 60 + Math.cos(r) * (m0.x - 60) - Math.sin(r) * (m0.y - 50),
+    y: 50 + Math.sin(r) * (m0.x - 60) + Math.cos(r) * (m0.y - 50),
+  };
+  // Put the mouth (where it holds things) exactly on the target.
+  const ax = h.tx - mouth.x * h.k;
+  const ay = h.ty - mouth.y * h.k;
+  const offL = -W - 20, offR = vw + 20, offT = -H - 30, offB = vh + 20;
+  // [start, arrive, (stop), exit] for each direction
+  const xs =
+    h.from === "left" ? [offL, ax, ax, offR] : h.from === "right" ? [offR, ax, ax, offL] : [ax, ax, ax, ax];
+  const ys =
+    h.from === "top"
+      ? [offT, ay, ay, ay, offT]
+      : h.from === "bottom"
+        ? [offB, ay, ay, ay, offB]
+        : [ay, ay, ay, ay, ay];
 
   return (
     <motion.div
       className="jb-helper"
-      style={{ width: W, height: H }}
-      initial={{ x: start, y: top }}
-      animate={{ x: [start, arrive, arrive, exit], y: [top, top, top - 12 * h.k, top, top] }}
+      data-stop={`${Math.round(h.tx)},${Math.round(h.ty)}`}
+      // The delivery "nod" scales around the mouth, so the mouth never leaves the necklace while stopped.
+      style={{ width: W, height: H, transformOrigin: `${mouth.x * h.k}px ${mouth.y * h.k}px` }}
+      initial={{ x: xs[0], y: ys[0] }}
+      animate={{ x: xs, y: ys, scale: [1, 1, 1.12, 1, 1] }}
       transition={{
         x: { duration: DURATION, times: [0, 0.36, 0.6, 1], ease: ["easeOut", "linear", "easeIn"] },
-        y: { duration: DURATION, times: [0, 0.36, 0.45, 0.54, 1] },
+        scale: { duration: DURATION, times: [0, 0.38, 0.46, 0.54, 1] },
+        y: {
+          duration: DURATION,
+          times: [0, 0.36, 0.45, 0.54, 1],
+          ease: h.from === "top" || h.from === "bottom" ? ["easeOut", "easeOut", "easeIn", "easeIn"] : "easeInOut",
+        },
       }}
       onAnimationComplete={() => onDone(h.id)}
     >
+      {h.from === "top" && (
+        // the thread it is lowered on, hand-drawn like the animals
+        <svg className="jb-thread" width="6" height={vh + 200} style={{ left: (50 / 120) * W - 3 }} aria-hidden="true">
+          <path d={threadPath(vh + 200, frame)} stroke={INK} strokeWidth="1.2" fill="none" strokeLinecap="round" />
+        </svg>
+      )}
       <motion.svg
         viewBox="0 0 120 100"
         width={W}
         height={H}
-        style={{ overflow: "visible", transform: h.dir === -1 ? "scaleX(-1)" : undefined }}
+        style={{ overflow: "visible", rotate: rot, scaleX: flip ? -1 : 1, transformOrigin: "50% 50%" }}
         animate={{ y: [0, -3 * h.k, 0] }}
         transition={{ duration: 0.32, repeat: Infinity, ease: "easeInOut" }}
       >

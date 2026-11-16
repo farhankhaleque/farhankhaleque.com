@@ -109,6 +109,22 @@ const TOTAL_CLICKS = STEPS.reduce((a, s) => a + s.clicks, 0);
 const CHAIN = { x: 176.3, y: 18, w: 247.4, h: 400 };
 const BOW = { x: 225, y: 378, w: 150, h: 175.7 };
 const CLASP_AT = { x: 294.8, y: 27.1 };
+// Solid points on the bow and on the upper chain (no stones there), for the animal helpers to stop at.
+const BOW_PT = {
+  knot: { x: 299.3, y: 436.2 },
+  loopL: { x: 255.4, y: 425.5 },
+  loopR: { x: 342.5, y: 421.2 },
+  lowL: { x: 261.1, y: 474.1 },
+  tailR: { x: 323.2, y: 503.3 },
+  top: { x: 287.5, y: 418.0 },
+};
+const CHAIN_PT = {
+  l1: { x: 241.0, y: 54.5 },
+  l2: { x: 212.2, y: 90.9 },
+  l3: { x: 196.4, y: 127.4 },
+  r1: { x: 338.0, y: 54.5 },
+  r2: { x: 374.5, y: 90.9 },
+};
 // Pencil line traced along the chain photo, for the drawing step.
 const CHAIN_SKETCH = "M256.5,397.3 C255.9,396.1 254.5,392.4 253.2,390.0 C251.9,387.6 250.4,385.1 248.6,382.7 C246.8,380.3 244.4,377.8 242.4,375.4 C240.4,373.0 238.5,370.6 236.6,368.2 C234.7,365.8 232.8,363.3 231.0,360.9 C229.2,358.5 227.4,356.0 225.6,353.6 C223.8,351.2 222.1,348.7 220.4,346.3 C218.7,343.9 217.1,341.4 215.5,339.0 C213.9,336.6 212.3,334.1 210.8,331.7 C209.3,329.3 207.9,326.8 206.5,324.4 C205.1,322.0 203.8,319.5 202.6,317.1 C201.3,314.7 200.2,312.2 199.0,309.8 C197.8,307.4 196.7,304.9 195.7,302.5 C194.7,300.1 193.8,297.6 192.9,295.2 C192.0,292.8 191.1,290.3 190.3,287.9 C189.5,285.5 188.8,283.0 188.1,280.6 C187.4,278.2 186.8,275.7 186.2,273.3 C185.6,270.9 185.1,268.4 184.6,266.0 C184.1,263.6 183.8,261.1 183.4,258.7 C183.1,256.3 182.7,253.8 182.5,251.4 C182.3,249.0 182.2,246.5 182.1,244.1 C182.0,241.7 181.9,239.2 181.9,236.8 C181.9,234.4 181.9,232.0 181.9,229.6 C181.9,227.2 182.0,224.7 182.0,222.3 C182.0,219.9 182.1,217.4 182.1,215.0 C182.1,212.6 182.2,210.1 182.2,207.7 C182.2,205.3 182.2,202.8 182.2,200.4 C182.2,198.0 182.3,195.5 182.3,193.1 C182.3,190.7 182.3,188.2 182.4,185.8 C182.5,183.4 182.6,180.9 182.8,178.5 C183.0,176.1 183.2,173.6 183.5,171.2 C183.8,168.8 184.1,166.3 184.5,163.9 C184.9,161.5 185.4,159.0 186.0,156.6 C186.6,154.2 187.2,151.7 187.9,149.3 C188.6,146.9 189.4,144.4 190.3,142.0 C191.2,139.6 192.1,137.1 193.1,134.7 C194.1,132.3 195.2,129.8 196.2,127.4 C197.2,125.0 198.3,122.5 199.3,120.1 C200.3,117.7 201.3,115.2 202.3,112.8 C203.3,110.4 204.2,107.9 205.3,105.5 C206.4,103.1 207.4,100.6 208.6,98.2 C209.8,95.8 211.1,93.3 212.4,90.9 C213.8,88.5 215.2,86.1 216.7,83.7 C218.2,81.3 219.8,78.8 221.6,76.4 C223.3,74.0 225.1,71.5 227.2,69.1 C229.3,66.7 231.5,64.2 234.0,61.8 C236.5,59.4 238.7,56.9 242.0,54.5 C245.3,52.1 250.2,49.6 253.9,47.2 C257.6,44.8 261.0,42.3 264.0,39.9 C267.0,37.5 266.7,35.2 271.8,32.6 C276.9,30.0 288.3,24.1 294.8,24.1 C301.3,24.1 306.9,30.0 310.7,32.6 C314.5,35.2 314.9,37.5 317.5,39.9 C320.1,42.3 323.0,44.8 326.3,47.2 C329.6,49.6 334.0,52.1 337.4,54.5 C340.8,56.9 343.8,59.4 346.7,61.8 C349.6,64.2 352.2,66.7 354.7,69.1 C357.2,71.5 359.4,74.0 361.6,76.4 C363.8,78.8 366.0,81.3 368.0,83.7 C370.0,86.1 371.9,88.5 373.8,90.9 C375.7,93.3 377.4,95.8 379.1,98.2 C380.8,100.6 382.4,103.1 384.0,105.5 C385.6,107.9 387.1,110.4 388.5,112.8 C389.9,115.2 391.3,117.7 392.6,120.1 C393.9,122.5 395.2,125.0 396.3,127.4 C397.4,129.8 398.5,132.3 399.5,134.7 C400.5,137.1 401.5,139.6 402.4,142.0 C403.3,144.4 404.2,146.9 405.0,149.3 C405.8,151.7 406.6,154.2 407.3,156.6 C408.0,159.0 408.7,161.5 409.3,163.9 C409.9,166.3 410.6,168.8 411.1,171.2 C411.7,173.6 412.1,176.1 412.6,178.5 C413.1,180.9 413.5,183.4 413.9,185.8 C414.3,188.2 414.7,190.7 415.0,193.1 C415.3,195.5 415.6,198.0 415.9,200.4 C416.1,202.8 416.3,205.3 416.5,207.7 C416.7,210.1 416.9,212.6 417.0,215.0 C417.1,217.4 417.3,219.9 417.4,222.3 C417.5,224.7 417.4,227.2 417.4,229.6 C417.4,232.0 417.5,234.4 417.4,236.8 C417.3,239.2 417.2,241.7 417.0,244.1 C416.8,246.5 416.6,249.0 416.4,251.4 C416.2,253.8 415.9,256.3 415.6,258.7 C415.3,261.1 414.9,263.6 414.5,266.0 C414.1,268.4 413.8,270.9 413.4,273.3 C413.0,275.7 412.5,278.2 411.9,280.6 C411.3,283.0 410.6,285.5 410.0,287.9 C409.4,290.3 408.7,292.8 408.0,295.2 C407.3,297.6 406.6,300.1 405.8,302.5 C405.0,304.9 404.2,307.4 403.3,309.8 C402.4,312.2 401.5,314.7 400.5,317.1 C399.5,319.5 398.6,322.0 397.5,324.4 C396.4,326.8 395.3,329.3 394.2,331.7 C393.1,334.1 391.9,336.6 390.7,339.0 C389.5,341.4 388.2,343.9 386.9,346.3 C385.6,348.7 384.1,351.2 382.7,353.6 C381.3,356.0 379.9,358.5 378.4,360.9 C376.9,363.3 375.3,365.8 373.7,368.2 C372.1,370.6 370.4,373.0 368.6,375.4 C366.8,377.8 364.9,380.3 362.8,382.7 C360.8,385.1 358.6,387.6 356.3,390.0 C354.0,392.4 351.2,394.9 348.9,397.3 C346.6,399.7 344.4,402.2 342.7,404.6 C341.0,407.0 339.2,410.7 338.5,411.9";
 // Crystals sit on the chain's real curve, growing toward the bow.
@@ -210,23 +226,28 @@ export default function BehrAtelier({ rsvpHref, shopHref, assets }: { rsvpHref: 
 
   // Which animal helps with each step, where on the necklace this click lands, and what it carries.
   const HELPER_KIND: Kind[] = ["bear", "beaver", "magpie", "salamander", "mouse", "lobster", "squirrel", "owl"];
+  // Every stop is a point on the necklace itself: on the chain, a stone, the clasp,
+  // or solid gold on the bow (points measured from the cut-out photos).
   function helperTarget(si: number, n: number): { x: number; y: number; prop?: Prop } {
     const id = STEPS[si].id;
-    if (id === "sketch") return { ...[{ x: 186, y: 230 }, { x: 414, y: 230 }, { x: 300, y: 32 }, { x: 300, y: 440 }][n - 1], prop: { kind: "pencil" } };
-    if (id === "wax") return { x: n % 2 ? 262 : 338, y: 440 + (n % 3) * 18, prop: { kind: "wax" } };
+    const stone = (i: number) => STONES[i];
+    if (id === "sketch") return { ...[CHAIN_PT.l2, CHAIN_PT.r2, CLASP_AT, BOW_PT.knot][n - 1], prop: { kind: "pencil" } };
+    if (id === "wax") return { ...[BOW_PT.loopL, BOW_PT.loopR, BOW_PT.knot, BOW_PT.lowL, BOW_PT.tailR][n - 1], prop: { kind: "wax" } };
     if (id === "source") {
+      // The magpie flies each material to where it will be used.
       const m = MATERIALS[n - 1];
-      return { x: m.x + m.w / 2, y: m.y + m.h / 2, prop: { kind: "img", href: assets + m.img, size: 26 } };
+      const at = [CHAIN_PT.l3, stone(5), stone(15), CLASP_AT][n - 1];
+      return { x: at.x, y: at.y, prop: { kind: "img", href: assets + m.img, size: 26 } };
     }
-    if (id === "cast") return { ...[{ x: 300, y: 450 }, { x: 186, y: 200 }, { x: 414, y: 200 }, { x: 300, y: 32 }][n - 1], prop: { kind: "flame" } };
+    if (id === "cast") return { ...[BOW_PT.knot, CHAIN_PT.l1, CHAIN_PT.r1, BOW_PT.tailR][n - 1], prop: { kind: "flame" } };
     if (id === "set") {
       const count = Math.round((n / STEPS[si].clicks) * STONE_COUNT);
       const st = STONES[SET_ORDER[Math.max(0, count - 1)]];
       return { x: st.x, y: st.y, prop: { kind: "img", href: assets + st.img, size: 16 } };
     }
     if (id === "clasp") return { x: CLASP_AT.x, y: CLASP_AT.y };
-    if (id === "assemble") return { x: 300, y: 392, prop: { kind: "ring" } };
-    return { ...[{ x: 330, y: 470 }, { x: 236, y: 300 }, { x: 470, y: 520 }][n - 1], prop: { kind: "sparkle" } };
+    if (id === "assemble") return { ...[stone(9), stone(19), BOW_PT.top][n - 1], prop: { kind: "ring" } };
+    return { ...[BOW_PT.loopR, stone(3), BOW_PT.lowL][n - 1], prop: { kind: "sparkle" } };
   }
   function sendHelper(si: number, n: number) {
     if (reduce || !svgRef.current) return;
@@ -235,11 +256,15 @@ export default function BehrAtelier({ rsvpHref, shopHref, assets }: { rsvpHref: 
     const ox = r.left + (r.width - 600 * k) / 2;
     const oy = r.top + (r.height - 560 * k) / 2;
     const t = helperTarget(si, n);
-    const dir: 1 | -1 = t.x < 290 ? 1 : t.x > 310 ? -1 : n % 2 ? 1 : -1;
+    // Entrances rotate around all four sides of the screen.
+    const id = ++helperId.current;
+    const from = (["left", "top", "right", "bottom"] as const)[(id - 1) % 4];
+    const dir: 1 | -1 = from === "right" ? -1 : 1; // the sprite flips / rotates itself to face its direction of travel
     const h: Helper = {
-      id: ++helperId.current,
+      id,
       kind: HELPER_KIND[si],
       dir,
+      from,
       tx: ox + t.x * k,
       ty: oy + t.y * k,
       k: Math.max(0.62, Math.min(1.4, k * 1.25)),
