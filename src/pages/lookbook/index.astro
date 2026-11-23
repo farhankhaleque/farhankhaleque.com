@@ -30,7 +30,7 @@ const layouts = [
 
     <!-- Auto-scrolling columns: each loops endlessly, neighbours move in opposite directions -->
     {layouts.map((layout) => (
-      <div class={`lb-viewport ${layout.cls} flex-1 min-w-0 gap-3 md:gap-4`} aria-label="Lookbook photos">
+      <div class={`lb-viewport ${layout.cls} flex-none md:flex-1 min-w-0 gap-3 md:gap-4`} aria-label="Lookbook photos">
         {layout.cols.map((col, ci) => (
           <div class="lb-col flex-1 min-w-0">
             <div class={`lb-track ${ci % 2 ? "lb-down" : "lb-up"}`}>
@@ -63,7 +63,7 @@ const layouts = [
     @media (min-width: 768px) {
       .lb-viewport { height: 100vh; }
     }
-    .lb-col { overflow: hidden; height: 100%; }
+    .lb-col { overflow: hidden; height: 100%; touch-action: pan-x; }
     .lb-track {
       display: flex;
       flex-direction: column;
@@ -82,7 +82,7 @@ const layouts = [
     /* Reduced motion: a normal, scrollable grid with no animation and no repeated photos */
     @media (prefers-reduced-motion: reduce) {
       .lb-viewport { height: auto; overflow: visible; }
-      .lb-col { height: auto; }
+      .lb-col { height: auto; touch-action: auto; }
       .lb-track { transform: none !important; }
       .lb-track img[aria-hidden="true"] { display: none; }
     }
@@ -96,13 +96,37 @@ const layouts = [
     const SPEED = 30; // pixels per second
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    type Track = { el: HTMLElement; dir: number; offset: number; paused: boolean; pending: number };
+    // On touch screens a finger drag up or down moves just that column, a flick keeps
+    // it gliding, and its auto scroll comes back a moment after the finger lifts.
+    type Track = {
+      el: HTMLElement;
+      dir: number;
+      offset: number;
+      paused: boolean;
+      pending: number;
+      drag: number; // finger movement waiting for the next frame
+      touching: boolean;
+      axis: "" | "x" | "y";
+      tx: number;
+      ty: number;
+      tt: number;
+      v: number; // glide speed after a flick, px per ms
+      resumeAt: number;
+    };
     const tracks: Track[] = [...document.querySelectorAll<HTMLElement>(".lb-track")].map((el) => ({
       el,
       dir: el.classList.contains("lb-down") ? 1 : -1,
       offset: 0,
       paused: false,
       pending: 0,
+      drag: 0,
+      touching: false,
+      axis: "",
+      tx: 0,
+      ty: 0,
+      tt: 0,
+      v: 0,
+      resumeAt: 0,
     }));
 
     // The track holds the column twice; one copy plus one gap is the loop length.
@@ -116,8 +140,11 @@ const layouts = [
 
     for (const t of tracks) {
       const col = t.el.parentElement as HTMLElement;
-      col.addEventListener("mouseenter", () => (t.paused = true));
-      col.addEventListener("mouseleave", () => {
+      col.addEventListener("pointerenter", (e) => {
+        if (e.pointerType === "mouse") t.paused = true;
+      });
+      col.addEventListener("pointerleave", (e) => {
+        if (e.pointerType !== "mouse") return;
         t.paused = false;
         t.pending = 0;
       });
@@ -133,6 +160,42 @@ const layouts = [
         },
         { passive: false },
       );
+      col.addEventListener(
+        "touchstart",
+        (e) => {
+          const p = e.touches[0];
+          Object.assign(t, { touching: true, axis: "", tx: p.clientX, ty: p.clientY, tt: e.timeStamp, v: 0 });
+        },
+        { passive: true },
+      );
+      col.addEventListener(
+        "touchmove",
+        (e) => {
+          if (!t.touching) return;
+          const p = e.touches[0];
+          const dx = p.clientX - t.tx, dy = p.clientY - t.ty;
+          if (!t.axis) {
+            if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+            t.axis = Math.abs(dy) >= Math.abs(dx) ? "y" : "x";
+          }
+          if (t.axis !== "y") { t.touching = false; return; }
+          e.preventDefault();
+          const dt = Math.max(1, e.timeStamp - t.tt);
+          t.v = 0.8 * (dy / dt) + 0.2 * t.v;
+          t.drag += dy;
+          Object.assign(t, { tx: p.clientX, ty: p.clientY, tt: e.timeStamp });
+        },
+        { passive: false },
+      );
+      const end = (e: TouchEvent) => {
+        if (t.axis === "y") t.resumeAt = performance.now() + 1500;
+        // Glide only after a flick, not when the finger stopped before lifting.
+        if (t.axis !== "y" || e.timeStamp - t.tt > 80) t.v = 0;
+        t.touching = false;
+        t.axis = "";
+      };
+      col.addEventListener("touchend", end);
+      col.addEventListener("touchcancel", end);
     }
 
     if (!reduced) {
@@ -148,7 +211,17 @@ const layouts = [
             t.pending -= wheel;
           }
           const p = period(t.el);
-          t.offset = wrap(t.offset + (t.paused ? 0 : t.dir * SPEED * dt) - wheel, p);
+          let move = -wheel;
+          if (t.drag) {
+            move += t.drag;
+            t.drag = 0;
+          } else if (!t.touching && Math.abs(t.v) > 0.01) {
+            move += t.v * dt * 1000; // flick glide
+            t.v *= Math.pow(0.95, dt * 60);
+          }
+          const holding = (t.touching && t.axis === "y") || (!t.touching && now < t.resumeAt);
+          if (!t.paused && !holding) move += t.dir * SPEED * dt;
+          t.offset = wrap(t.offset + move, p);
           t.el.style.transform = `translate3d(0, ${t.offset}px, 0)`;
         }
         requestAnimationFrame(frame);

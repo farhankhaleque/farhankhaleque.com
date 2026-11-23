@@ -25,6 +25,10 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   const [reduced, setReduced] = useState(false);
   // Wheel scrolling while hovered: deltas queue here and ease in over a few frames.
   const pending = useRef(0);
+  const touchMove = useRef(0);
+  // Touch: a finger drag moves the carousel directly, a flick keeps it gliding,
+  // and the auto scroll comes back a moment after the finger lifts.
+  const touch = useRef({ active: false, axis: "" as "" | "x" | "y", x: 0, y: 0, t: 0, v: 0, resumeAt: 0 });
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -41,7 +45,9 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   }, [isMobile, y, x]);
 
   // Hovering stops the auto scroll; the mouse wheel then moves the carousel
-  // up or down (no scrollbar, the page itself doesn't scroll).
+  // up or down (no scrollbar, the page itself doesn't scroll). On touch screens,
+  // dragging along the carousel (left/right on phones, up/down on wide screens)
+  // moves it the same way.
   useEffect(() => {
     const el = carouselRef.current;
     if (!el || reduced) return;
@@ -52,8 +58,49 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
       e.preventDefault();
       pending.current += d;
     };
+    const along = () => (window.innerWidth < 768 ? "x" : "y");
+    const onStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      Object.assign(touch.current, { active: true, axis: "", x: t.clientX, y: t.clientY, t: e.timeStamp, v: 0 });
+    };
+    const onMove = (e: TouchEvent) => {
+      const s = touch.current;
+      if (!s.active) return;
+      const t = e.touches[0];
+      const dx = t.clientX - s.x, dy = t.clientY - s.y;
+      if (!s.axis) {
+        if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+        s.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      }
+      if (s.axis !== along()) { s.active = false; return; } // let the page scroll
+      e.preventDefault();
+      const d = -(s.axis === "x" ? dx : dy);
+      const dt = Math.max(1, e.timeStamp - s.t);
+      s.v = 0.8 * (d / dt) + 0.2 * s.v; // px per ms, smoothed
+      pending.current = 0;
+      touchMove.current += d;
+      Object.assign(s, { x: t.clientX, y: t.clientY, t: e.timeStamp });
+    };
+    const onEnd = (e: TouchEvent) => {
+      const s = touch.current;
+      if (s.axis === along()) s.resumeAt = performance.now() + 1500;
+      // Glide only after a flick, not when the finger stopped before lifting.
+      if (s.axis !== along() || e.timeStamp - s.t > 80) s.v = 0;
+      s.active = false;
+      s.axis = "";
+    };
     el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
+    el.addEventListener("touchstart", onStart, { passive: true });
+    el.addEventListener("touchmove", onMove, { passive: false });
+    el.addEventListener("touchend", onEnd);
+    el.addEventListener("touchcancel", onEnd);
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("touchstart", onStart);
+      el.removeEventListener("touchmove", onMove);
+      el.removeEventListener("touchend", onEnd);
+      el.removeEventListener("touchcancel", onEnd);
+    };
   }, [reduced]);
 
   // Keep the offset inside one copy of the doubled list so the loop is seamless both ways.
@@ -67,7 +114,17 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
     const content = contentRef.current;
     if (!content || reduced || panels.length === 0) return;
     let distance = 0;
-    if (!paused) distance += ((scrollSpeed * 1000) / Math.max(1, interval)) * (delta / 1000);
+    const tc = touch.current;
+    const touching = tc.active && tc.axis !== "";
+    if (touchMove.current) {
+      distance += touchMove.current;
+      touchMove.current = 0;
+    } else if (!tc.active && Math.abs(tc.v) > 0.01) {
+      distance += tc.v * delta; // flick glide
+      tc.v *= Math.pow(0.95, delta / 16.7);
+    }
+    const holding = touching || (!tc.active && performance.now() < tc.resumeAt);
+    if (!paused && !holding) distance += ((scrollSpeed * 1000) / Math.max(1, interval)) * (delta / 1000);
     if (pending.current) {
       const step = Math.abs(pending.current) < 0.5 ? pending.current : pending.current * 0.25;
       pending.current -= step;
@@ -85,10 +142,11 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
 
   return (
     <div
-      className="h-[56vh] md:h-screen w-full overflow-hidden relative"
+      className="h-[56vh] md:h-screen w-full overflow-hidden relative touch-pan-y md:touch-pan-x"
       ref={carouselRef}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => {
+      onPointerEnter={(e) => e.pointerType === "mouse" && setPaused(true)}
+      onPointerLeave={(e) => {
+        if (e.pointerType !== "mouse") return;
         setPaused(false);
         pending.current = 0;
       }}
