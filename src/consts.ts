@@ -23,7 +23,6 @@ export const URLS = [
   { href: url("/"), text: "Home" },
   { href: url("/experience"), text: "Experience" },
   { href: url("/lookbook"), text: "Lookbook" },
-  { href: url("/case-studies"), text: "Case Studies" },
   { href: url("/about"), text: "About" },
   { href: url("/contact"), text: "Contact" },
 ];
