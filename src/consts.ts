@@ -1,8 +1,7 @@
 // Site-wide settings. Edit these to change names, links, and the menu.
 
 export const SITE_TITLE = "Farhan Khaleque";
-export const SITE_DESCRIPTION =
-  "Farhan Khaleque: fashion merchandising, product development, and code. NYU Computer Science.";
+export const SITE_DESCRIPTION = "designer | sculptor | sculpture";
 export const SITE_URL = "https://www.farhankhaleque.com";
 export const SITE_AUTHOR = "Farhan Khaleque";
 export const SITE_EMAIL = "farhankhaleque@nyu.edu";
