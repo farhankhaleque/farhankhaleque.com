@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Content Engine (web demo)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6'/%3E%3Cpath d='M6 8h12M6 12h8M6 16h10' stroke='white' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0a0a0a; --panel: #121212; --panel-2: #181818; --line: #262626; --line-2: #333;
+  --text: #ededed; --muted: #8a8a8a; --faint: #5c5c5c;
+  --accent: #ededed; --accent-ink: #0a0a0a;
+  --warn: #e0a84a; --warn-bg: rgba(224,168,74,.10);
+  --bad: #ef6b6b; --bad-bg: rgba(239,107,107,.10);
+  --good: #6fcf8e; --good-bg: rgba(111,207,142,.10);
+  --radius: 10px; --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg: #f6f5f3; --panel: #ffffff; --panel-2: #f1f0ee; --line: #e3e1dd; --line-2: #d2cfca;
+    --text: #161616; --muted: #6b6b6b; --faint: #9a9a9a; --accent: #161616; --accent-ink: #fff;
+    --warn: #a8701a; --warn-bg: rgba(168,112,26,.10); --bad: #c23b3b; --bad-bg: rgba(194,59,59,.08);
+    --good: #2f8a4c; --good-bg: rgba(47,138,76,.10);
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--text); font: 14px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+button, input, textarea, select { font: inherit; color: inherit; }
+h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -.01em; }
+
+/* ---------- top bar ---------- */
+.top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px;
+  padding: 12px 20px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 650; font-size: 15px; }
+.brand .mark { width: 22px; height: 22px; border-radius: 6px; background: var(--accent); display: grid; place-items: center; }
+.brand .mark svg { width: 14px; height: 14px; stroke: var(--accent-ink); }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid var(--line); border-radius: 99px;
+  font-size: 12px; color: var(--muted); white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
+.chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); flex: none; }
+.chip.ok .dot { background: var(--good); } .chip.bad .dot { background: var(--bad); } .chip.demo .dot { background: var(--warn); }
+.spacer { flex: 1; }
+
+/* ---------- buttons & fields ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 34px; padding: 0 14px;
+  border-radius: 8px; border: 1px solid var(--line-2); background: var(--panel-2); cursor: pointer; white-space: nowrap; transition: background .12s, border-color .12s, opacity .12s; }
+.btn:hover:not(:disabled) { border-color: var(--muted); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.btn.primary:hover:not(:disabled) { opacity: .9; }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--muted); }
+.btn.ghost:hover:not(:disabled) { color: var(--text); border-color: var(--line); }
+.btn.sm { height: 28px; padding: 0 10px; font-size: 12.5px; border-radius: 7px; }
+.btn.block { width: 100%; height: 42px; font-size: 14.5px; }
+.btn svg { width: 15px; height: 15px; flex: none; }
+.spin { width: 15px; height: 15px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+label.f { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+label.f .count { float: right; font-variant-numeric: tabular-nums; }
+label.f .count.over { color: var(--bad); font-weight: 600; }
+.in, .ta { width: 100%; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; outline: none; transition: border-color .12s; }
+.in:focus, .ta:focus { border-color: var(--muted); }
+.ta { resize: vertical; min-height: 38px; line-height: 1.55; }
+.ta.auto { resize: none; overflow: hidden; }
+.in::placeholder, .ta::placeholder { color: var(--faint); }
+.flagged { border-color: var(--warn) !important; background: var(--warn-bg); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+.stack > * + * { margin-top: 14px; }
+
+/* ---------- layout ---------- */
+.app { display: grid; grid-template-columns: 380px 1fr; min-height: calc(100vh - 59px); }
+.side { border-right: 1px solid var(--line); padding: 20px; position: sticky; top: 59px; height: calc(100vh - 59px); overflow-y: auto; }
+.main { padding: 24px 32px 60px; min-width: 0; }
+.sec-title { font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.sec-title .hint { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--faint); }
+.divider { height: 1px; background: var(--line); margin: 20px 0; }
+
+/* ---------- photos ---------- */
+.drop { border: 1.5px dashed var(--line-2); border-radius: var(--radius); padding: 18px; text-align: center; cursor: pointer; transition: border-color .12s, background .12s; color: var(--muted); }
+.drop:hover, .drop.over { border-color: var(--muted); background: var(--panel); color: var(--text); }
+.drop svg { width: 26px; height: 26px; stroke: currentColor; margin-bottom: 4px; }
+.drop small { display: block; color: var(--faint); font-size: 12px; margin-top: 2px; }
+.thumbs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 10px; }
+.thumb { position: relative; aspect-ratio: 3/4; border-radius: 7px; overflow: hidden; background: var(--panel-2); border: 1px solid var(--line); cursor: pointer; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb.hero { outline: 2px solid var(--accent); outline-offset: 1px; }
+.thumb .tag { position: absolute; left: 4px; bottom: 4px; font-size: 9.5px; font-weight: 700; letter-spacing: .05em; background: var(--accent); color: var(--accent-ink); padding: 1px 5px; border-radius: 4px; }
+.thumb .x { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; border: 0; background: rgba(0,0,0,.65); color: #fff; font-size: 13px; line-height: 1; cursor: pointer; opacity: 0; transition: opacity .12s; }
+.thumb:hover .x { opacity: 1; }
+.thumb.loading { display: grid; place-items: center; color: var(--muted); }
+
+/* ---------- empty state ---------- */
+.empty { max-width: 560px; margin: 10vh auto 0; text-align: center; color: var(--muted); }
+.empty h2 { color: var(--text); font-size: 22px; margin-bottom: 8px; }
+.empty .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 28px; text-align: left; }
+.empty .step { border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; background: var(--panel); }
+.empty .step b { display: block; color: var(--text); margin-bottom: 4px; font-size: 13px; }
+.empty .step span { font-size: 12.5px; }
+.empty .num { font-family: var(--mono); font-size: 11px; color: var(--faint); }
+
+/* ---------- loading ---------- */
+.working { max-width: 520px; margin: 14vh auto 0; text-align: center; }
+.working .bar { height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; margin: 18px auto 10px; width: 260px; }
+.working .bar i { display: block; height: 100%; width: 40%; background: var(--accent); animation: slide 1.3s ease-in-out infinite; }
+@keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
+.working p { color: var(--muted); margin: 0; }
+
+/* ---------- result header ---------- */
+.rhead { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+.rhead h1 { font-size: 24px; line-height: 1.25; }
+.rhead .sub { color: var(--muted); margin-top: 4px; }
+.meta { font-size: 12px; color: var(--faint); margin-top: 6px; font-variant-numeric: tabular-nums; }
+
+.status-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; align-items: start; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+.panel { padding: 14px 16px; }
+.panel-head { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.panel-head h3 { font-size: 13.5px; flex: 1; }
+.badge { font-size: 11.5px; font-weight: 600; padding: 1px 8px; border-radius: 99px; font-variant-numeric: tabular-nums; }
+.badge.good { background: var(--good-bg); color: var(--good); } .badge.warn { background: var(--warn-bg); color: var(--warn); }
+.icon-status { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.icon-status svg { width: 13px; height: 13px; }
+.icon-status.good { background: var(--good-bg); color: var(--good); } .icon-status.warn { background: var(--warn-bg); color: var(--warn); }
+.panel-body { margin-top: 10px; max-height: 220px; overflow-y: auto; }
+.panel.collapsed .panel-body { display: none; }
+.issue { display: flex; gap: 10px; padding: 7px 0; border-top: 1px solid var(--line); font-size: 13px; cursor: pointer; }
+.issue:first-child { border-top: 0; }
+.issue:hover .issue-field { text-decoration: underline; }
+.issue-field { font-family: var(--mono); font-size: 11.5px; color: var(--warn); white-space: nowrap; }
+.issue-snip { color: var(--muted); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chk { display: flex; gap: 10px; padding: 6px 0; font-size: 13px; cursor: pointer; align-items: flex-start; }
+.chk input { margin-top: 3px; accent-color: var(--good); }
+.chk.done span { color: var(--faint); text-decoration: line-through; }
+.progress-mini { height: 3px; border-radius: 3px; background: var(--line); margin-top: 10px; overflow: hidden; }
+.progress-mini i { display: block; height: 100%; background: var(--good); transition: width .2s; }
+
+/* ---------- tabs ---------- */
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 22px; overflow-x: auto; }
+.tab { background: none; border: 0; padding: 10px 14px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; display: flex; align-items: center; gap: 7px; }
+.tab:hover { color: var(--text); }
+.tab.on { color: var(--text); border-bottom-color: var(--accent); font-weight: 550; }
+.tab .n { font-size: 10.5px; font-weight: 700; background: var(--warn-bg); color: var(--warn); border-radius: 99px; padding: 0 6px; }
+.pane { display: none; max-width: 900px; }
+.pane.on { display: block; }
+.edit-note { font-size: 12px; color: var(--faint); margin-bottom: 16px; display: flex; align-items: center; gap: 6px; }
+.edit-note svg { width: 13px; height: 13px; }
+
+/* instagram */
+.caps { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.cap { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.cap-head { display: flex; align-items: center; gap: 8px; }
+.cap-head .angle { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; color: var(--muted); flex: 1; }
+.cap .ta { background: transparent; border-color: transparent; padding: 4px 0; }
+.cap .ta:focus { border-color: var(--line); padding: 4px 8px; background: var(--panel-2); }
+.tags { font-size: 12.5px; color: var(--muted); }
+
+/* tech pack */
+.tp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.tp-grid .card { padding: 14px; }
+.tp-grid h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 8px; }
+.tp-grid .ta { background: transparent; border-color: transparent; padding: 2px 0; font-size: 13px; }
+.tp-grid .ta:focus { background: var(--panel-2); border-color: var(--line); padding: 2px 8px; }
+.list-hint { font-size: 11.5px; color: var(--faint); margin-top: 4px; }
+
+/* imagery */
+.img-setup { display: grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: start; }
+.hero-prev { aspect-ratio: 3/4; border-radius: var(--radius); overflow: hidden; background: var(--panel-2); border: 1px solid var(--line); display: grid; place-items: center; color: var(--faint); font-size: 12px; text-align: center; padding: 0; }
+.hero-prev img { width: 100%; height: 100%; object-fit: cover; }
+.scene-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.schip { padding: 5px 11px; border-radius: 99px; border: 1px solid var(--line-2); background: transparent; cursor: pointer; font-size: 12.5px; color: var(--muted); }
+.schip:hover { color: var(--text); }
+.schip.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.toggle input { display: none; }
+.toggle .sw { width: 34px; height: 20px; border-radius: 99px; background: var(--line-2); position: relative; transition: background .15s; flex: none; }
+.toggle .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--text); transition: transform .15s; }
+.toggle input:checked + .sw { background: var(--good); }
+.toggle input:checked + .sw::after { transform: translateX(14px); background: #fff; }
+.toggle small { display: block; color: var(--faint); font-size: 12px; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-top: 22px; }
+.gimg { overflow: hidden; }
+.gimg .pic { aspect-ratio: 3/4; background: var(--panel-2) center/cover no-repeat; cursor: zoom-in; }
+.gimg .pic.pending { display: grid; place-items: center; color: var(--muted); cursor: default; }
+.gimg .pic.failed { display: grid; place-items: center; color: var(--bad); font-size: 12px; padding: 12px; text-align: center; cursor: default; }
+.gimg .cap-row { display: flex; align-items: center; gap: 4px; padding: 8px 8px 8px 12px; font-size: 12.5px; }
+.gimg .cap-row span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* export */
+.exp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.exp { padding: 16px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; text-align: left; transition: border-color .12s; }
+.exp:hover { border-color: var(--muted); }
+.exp.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.exp.primary small { color: color-mix(in srgb, var(--accent-ink) 65%, transparent); }
+.exp b { font-size: 14px; } .exp small { color: var(--muted); font-size: 12px; }
+.exp svg { width: 18px; height: 18px; margin-bottom: 6px; }
+pre.preview { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; font: 12.5px/1.6 var(--mono); white-space: pre-wrap; max-height: 460px; overflow: auto; color: var(--muted); margin: 0; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; padding: 2px; gap: 2px; }
+.seg button { border: 0; background: transparent; padding: 4px 12px; border-radius: 6px; cursor: pointer; color: var(--muted); font-size: 12.5px; }
+.seg button.on { background: var(--panel-2); color: var(--text); }
+
+/* rewrite (sidebar) */
+.rewrite-box { border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; background: var(--panel); }
+.row { display: flex; gap: 8px; align-items: center; }
+
+/* drawer */
+.scrim { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 40; opacity: 0; pointer-events: none; transition: opacity .18s; }
+.scrim.on { opacity: 1; pointer-events: auto; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(520px, 100vw); background: var(--panel); border-left: 1px solid var(--line); z-index: 41; transform: translateX(100%); transition: transform .22s ease; display: flex; flex-direction: column; }
+.drawer.on { transform: none; }
+.drawer-head { display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.drawer-head h2 { font-size: 16px; flex: 1; }
+.drawer-body { padding: 20px; overflow-y: auto; flex: 1; }
+.drawer-foot { padding: 14px 20px; border-top: 1px solid var(--line); display: flex; gap: 8px; justify-content: flex-end; }
+.check-out { font-size: 12.5px; border-radius: 8px; padding: 10px 12px; background: var(--panel-2); border: 1px solid var(--line); }
+.check-out div { display: flex; gap: 8px; } .check-out div + div { margin-top: 4px; }
+.check-out b { min-width: 86px; color: var(--muted); font-weight: 500; }
+
+/* lightbox */
+.lightbox { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.88); display: none; place-items: center; padding: 30px; cursor: zoom-out; }
+.lightbox.on { display: grid; }
+.lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; }
+
+/* toast */
+.toasts { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 70; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+.toast { pointer-events: auto; background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 10px; padding: 10px 14px; box-shadow: 0 8px 30px rgba(0,0,0,.35); max-width: 560px; font-size: 13px; display: flex; gap: 10px; align-items: flex-start; animation: up .2s ease; }
+.toast.err { border-color: var(--bad); } .toast.err b { color: var(--bad); }
+.toast.ok b { color: var(--good); }
+@keyframes up { from { transform: translateY(8px); opacity: 0; } }
+kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line-2); border-bottom-width: 2px; padding: 0 5px; border-radius: 4px; color: var(--muted); }
+
+@media (max-width: 980px) {
+  .app { grid-template-columns: 1fr; }
+  .side { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+  .main { padding: 20px 16px 60px; }
+  .status-row, .tp-grid, .img-setup { grid-template-columns: 1fr; }
+  .exp-grid { grid-template-columns: 1fr 1fr; }
+  .empty .steps { grid-template-columns: 1fr; }
+  .chip.model { display: none; }
+}
+</style>
+</head>
+<body>
+<div style="background:#1a1400;color:#f3d27a;border-bottom:1px solid #3a2f00;padding:8px 16px;font:13px/1.4 system-ui,sans-serif;text-align:center">Web demo: sample copy and tinted mockups, no AWS calls. The real app runs locally on Claude and Nova Canvas through Amazon Bedrock.</div>
+
+<header class="top">
+  <div class="brand">
+    <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h10M4 17h13"/></svg></div>
+    Content engine
+  </div>
+  <span class="chip model" id="modelChip"><span class="dot"></span><span id="modelChipText">Loading…</span></span>
+  <div class="spacer"></div>
+  <button class="btn ghost sm" id="newBtn" title="Start a new product">New product</button>
+  <button class="btn sm" id="settingsBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    Settings
+  </button>
+</header>
+
+<div class="app">
+  <!-- ================= SIDEBAR: inputs ================= -->
+  <aside class="side">
+    <div class="sec-title">Photos <span class="hint">1 to 5 · click one to make it the hero</span></div>
+    <div class="drop" id="drop">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+      <div>Drop photos or <u>browse</u></div>
+      <small>Front, back, a detail shot · JPG, PNG, WEBP, HEIC</small>
+      <input type="file" id="file" accept=".jpg,.jpeg,.png,.webp,.heic,image/*" multiple hidden>
+    </div>
+    <div class="thumbs" id="thumbs"></div>
+
+    <div class="divider"></div>
+    <div class="sec-title">What you know <span class="hint">blank is fine, it gets flagged</span></div>
+    <div class="grid2">
+      <div><label class="f">Working name</label><input class="in" data-brief="name" placeholder="Boxy hoodie"></div>
+      <div><label class="f">Price</label><input class="in" data-brief="price" placeholder="$110"></div>
+      <div><label class="f">Fabric / weight</label><input class="in" data-brief="fabric" placeholder="12 oz loopback"></div>
+      <div><label class="f">Fit</label><input class="in" data-brief="fit" placeholder="Boxy, cropped"></div>
+      <div><label class="f">Drop</label><input class="in" data-brief="drop" placeholder="Drop 5"></div>
+      <div><label class="f">Units made</label><input class="in" data-brief="units" placeholder="15"></div>
+    </div>
+    <div style="margin-top:10px"><label class="f">Anything else</label>
+      <textarea class="ta" data-brief="notes" rows="3" placeholder="Hand cut, garment dyed, drops Friday 7pm, the story behind it…"></textarea></div>
+
+    <button class="btn primary block" id="genBtn" style="margin-top:16px" disabled>Write content</button>
+    <div style="text-align:center;font-size:11.5px;color:var(--faint);margin-top:6px"><kbd>⌘</kbd> <kbd>Enter</kbd></div>
+
+    <div id="rewriteWrap" hidden>
+      <div class="divider"></div>
+      <div class="sec-title">Rewrite <span class="hint" id="versionHint"></span></div>
+      <div class="rewrite-box">
+        <textarea class="ta" id="feedback" rows="3" placeholder="Less hype in the captions. Mention it's garment dyed. The fit runs big, tell people to size down."></textarea>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary sm" id="reviseBtn" disabled>Rewrite with notes</button>
+          <div class="spacer"></div>
+          <button class="btn ghost sm" id="undoBtn" disabled>Undo</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN: results ================= -->
+  <main class="main" id="main">
+    <div class="empty" id="empty">
+      <h2>Photo in. Everything you need to list it, out.</h2>
+      <div>Product page, SEO, Instagram captions, drop copy, a tech pack draft and mockup imagery, all in the brand voice.</div>
+      <div class="steps">
+        <div class="step"><span class="num">01</span><b>Add photos</b><span>Plain background, even light, whole garment in frame.</span></div>
+        <div class="step"><span class="num">02</span><b>Fill what you know</b><span>Price, fabric, units. Guesses get flagged for you to check.</span></div>
+        <div class="step"><span class="num">03</span><b>Edit and export</b><span>Every field is editable. Export a zip, Markdown or Shopify CSV.</span></div>
+      </div>
+    </div>
+
+    <div class="working" id="working" hidden>
+      <h2 id="workingTitle">Claude is looking at the photos</h2>
+      <div class="bar"><i></i></div>
+      <p id="workingSub">Writing the page, SEO, captions, drop copy and tech pack. This usually takes 20 to 60 seconds.</p>
+    </div>
+
+    <div id="result" hidden>
+      <div class="rhead">
+        <div style="flex:1;min-width:0">
+          <h1 id="rTitle"></h1>
+          <div class="sub" id="rShort"></div>
+          <div class="meta" id="rMeta"></div>
+        </div>
+        <button class="btn sm" id="quickZip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          Download all
+        </button>
+      </div>
+
+      <div class="status-row">
+        <div class="card panel" id="voicePanel">
+          <div class="panel-head" data-collapse="voicePanel">
+            <div class="icon-status" id="voiceIcon"></div>
+            <h3 id="voiceTitle">Voice check</h3>
+            <button class="btn sm" id="fixBtn" hidden>Fix dashes</button>
+          </div>
+          <div class="panel-body" id="issues"></div>
+        </div>
+        <div class="card panel" id="confirmPanel">
+          <div class="panel-head" data-collapse="confirmPanel">
+            <div class="icon-status" id="confirmIcon"></div>
+            <h3>Check before publishing</h3>
+            <span class="badge" id="confirmBadge"></span>
+          </div>
+          <div class="panel-body" id="confirms"></div>
+          <div class="progress-mini"><i id="confirmBar"></i></div>
+        </div>
+      </div>
+
+      <nav class="tabs" id="tabs">
+        <button class="tab on" data-tab="page">Product page<span class="n" data-tabn="page" hidden></span></button>
+        <button class="tab" data-tab="seo">SEO<span class="n" data-tabn="seo" hidden></span></button>
+        <button class="tab" data-tab="ig">Instagram<span class="n" data-tabn="ig" hidden></span></button>
+        <button class="tab" data-tab="drop">Drop<span class="n" data-tabn="drop" hidden></span></button>
+        <button class="tab" data-tab="tech">Tech pack</button>
+        <button class="tab" data-tab="img">Imagery</button>
+        <button class="tab" data-tab="export">Export</button>
+      </nav>
+
+      <!-- product page -->
+      <section class="pane on" data-pane="page">
+        <div class="edit-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Everything here is editable. Exports use your edits.</div>
+        <div class="stack">
+          <div><label class="f">Title</label><input class="in" data-path="product_title" style="font-size:16px;font-weight:600"></div>
+          <div><label class="f">Short description</label><textarea class="ta auto" data-path="short_description" rows="2"></textarea></div>
+          <div><label class="f">Description</label><textarea class="ta auto" data-path="product_description" rows="8"></textarea></div>
+          <div class="grid2">
+            <div><label class="f">Details <span class="count">one per line</span></label><textarea class="ta auto" data-path="details" data-list rows="5"></textarea></div>
+            <div><label class="f">Care <span class="count">one per line</span></label><textarea class="ta auto" data-path="care_instructions" data-list rows="5"></textarea></div>
+          </div>
+          <div><label class="f">Fit notes</label><textarea class="ta auto" data-path="fit_notes" rows="2"></textarea></div>
+        </div>
+      </section>
+
+      <!-- SEO -->
+      <section class="pane" data-pane="seo">
+        <div class="stack">
+          <div><label class="f">Meta title <span class="count" data-count="seo.meta_title" data-max="60"></span></label><input class="in" data-path="seo.meta_title"></div>
+          <div><label class="f">Meta description <span class="count" data-count="seo.meta_description" data-max="155"></span></label><textarea class="ta auto" data-path="seo.meta_description" rows="2"></textarea></div>
+          <div><label class="f">URL handle</label><input class="in" data-path="seo.url_handle" style="font-family:var(--mono);font-size:13px"></div>
+          <div><label class="f">Keywords <span class="count">one per line</span></label><textarea class="ta auto" data-path="seo.keywords" data-list rows="4"></textarea></div>
+          <div id="altList"></div>
+          <div>
+            <label class="f">Search preview</label>
+            <div class="card" style="padding:14px 16px">
+              <div style="font-size:12px;color:var(--muted)" id="serpUrl"></div>
+              <div style="font-size:17px;color:#8ab4f8;margin:2px 0" id="serpTitle"></div>
+              <div style="font-size:13px;color:var(--muted)" id="serpDesc"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Instagram -->
+      <section class="pane" data-pane="ig"><div class="caps" id="caps"></div></section>
+
+      <!-- Drop -->
+      <section class="pane" data-pane="drop">
+        <div class="card" style="padding:16px;max-width:560px">
+          <div class="row" style="margin-bottom:8px"><div class="sec-title" style="margin:0;flex:1">Drop announcement</div><button class="btn sm" data-copy="drop_announcement">Copy</button></div>
+          <textarea class="ta auto" data-path="drop_announcement" rows="5" style="font-size:15px"></textarea>
+        </div>
+      </section>
+
+      <!-- Tech pack -->
+      <section class="pane" data-pane="tech">
+        <div class="grid2" style="margin-bottom:14px;grid-template-columns:1fr 1fr 2fr">
+          <div><label class="f">Style name</label><input class="in" data-path="tech_pack.style_name"></div>
+          <div><label class="f">Category</label><input class="in" data-path="tech_pack.category"></div>
+          <div><label class="f">Silhouette</label><input class="in" data-path="tech_pack.silhouette"></div>
+        </div>
+        <div class="tp-grid">
+          <div class="card"><h4>Fabric</h4><textarea class="ta auto" data-path="tech_pack.fabric_suggestions" data-list></textarea></div>
+          <div class="card"><h4>Trims</h4><textarea class="ta auto" data-path="tech_pack.trims" data-list></textarea></div>
+          <div class="card"><h4>Construction</h4><textarea class="ta auto" data-path="tech_pack.construction_details" data-list></textarea></div>
+          <div class="card"><h4>Points of measure</h4><textarea class="ta auto" data-path="tech_pack.measurement_points" data-list></textarea></div>
+          <div class="card"><h4>Colorways</h4><textarea class="ta auto" data-path="tech_pack.colorways" data-list></textarea></div>
+          <div class="card"><h4>Open questions</h4><textarea class="ta auto" data-path="tech_pack.open_questions" data-list></textarea></div>
+        </div>
+        <div class="list-hint">One item per line.</div>
+      </section>
+
+      <!-- Imagery -->
+      <section class="pane" data-pane="img">
+        <div class="img-setup">
+          <div>
+            <div class="hero-prev" id="heroPrev">Add a photo</div>
+            <div style="font-size:11.5px;color:var(--faint);margin-top:6px;text-align:center">Built on the hero photo</div>
+          </div>
+          <div class="stack">
+            <div><label class="f">What Nova Canvas should find in the photo</label>
+              <input class="in" id="garment" placeholder="black hoodie">
+              <div class="list-hint">A short noun phrase like "black hoodie". It's used as the mask.</div></div>
+            <label class="toggle"><input type="checkbox" id="cutout"><span class="sw"></span><span>Clean cutout<small>Background removed, for the product grid</small></span></label>
+            <div><label class="f">Scenes <span class="count">keeps the garment as shot</span></label>
+              <div class="scene-chips" id="sceneChips"></div>
+              <input class="in" id="customScene" placeholder="Or describe your own scene, then press Enter" style="margin-top:8px"></div>
+            <div class="grid2">
+              <div><label class="f">Colorways <span class="count">comma separated</span></label><input class="in" id="colors" placeholder="forest green, bone"></div>
+              <div><label class="f">Seed <span class="count">same seed, same image</span></label><input class="in" id="seed" type="number" value="7" min="0" max="2147483646"></div>
+            </div>
+            <div class="row">
+              <button class="btn primary" id="imgBtn" disabled>Generate images</button>
+              <span style="font-size:12px;color:var(--faint)">Nova Canvas bills per image. Treat scenes and colorways as mockups.</span>
+            </div>
+          </div>
+        </div>
+        <div class="gallery" id="gallery"></div>
+      </section>
+
+      <!-- Export -->
+      <section class="pane" data-pane="export">
+        <div class="exp-grid">
+          <button class="card exp primary" data-export="zip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg><b>Everything</b><small id="zipNote">.zip with copy, CSV, JSON and images</small></button>
+          <button class="card exp" data-export="markdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5"/></svg><b>Markdown</b><small>Readable content sheet</small></button>
+          <button class="card exp" data-export="csv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18"/></svg><b>Shopify CSV</b><small>Imports as a draft</small></button>
+          <button class="card exp" data-export="json"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 3h1a2 2 0 0 1 2 2v5a2 2 0 0 0 2 2 2 2 0 0 0-2 2v5a2 2 0 0 1-2 2h-1"/></svg><b>JSON</b><small>Everything, structured</small></button>
+        </div>
+        <div class="row" style="margin:22px 0 10px">
+          <div class="seg" id="prevSeg"><button class="on" data-prev="markdown">Markdown</button><button data-prev="csv">CSV</button><button data-prev="json">JSON</button></div>
+          <div class="spacer"></div>
+          <button class="btn sm" id="copyPrev">Copy</button>
+          <button class="btn sm" id="saveBtn">Save to outputs folder</button>
+        </div>
+        <pre class="preview" id="preview"></pre>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- ================= SETTINGS DRAWER ================= -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head"><h2>Settings</h2><button class="btn ghost sm" id="closeDrawer">Close</button></div>
+  <div class="drawer-body stack">
+    <div class="sec-title">AWS and models</div>
+    <div class="grid2">
+      <div><label class="f">AWS region</label><input class="in" id="sRegion"></div>
+      <div><label class="f">AWS profile <span class="count">optional</span></label><input class="in" id="sProfile" placeholder="default"></div>
+    </div>
+    <div><label class="f">Claude model / inference profile</label><input class="in" id="sText" list="textModels" style="font-family:var(--mono);font-size:12.5px"><datalist id="textModels"></datalist></div>
+    <div><label class="f">Image model</label><input class="in" id="sImage" list="imageModels" style="font-family:var(--mono);font-size:12.5px"><datalist id="imageModels"></datalist></div>
+    <div class="row">
+      <button class="btn sm" id="checkBtn">Test connection</button>
+      <button class="btn sm" id="modelsBtn">List my models</button>
+    </div>
+    <div class="check-out" id="checkOut" hidden></div>
+
+    <div class="divider"></div>
+    <div class="sec-title">Copy</div>
+    <label class="toggle"><input type="checkbox" id="sAutofix" checked><span class="sw"></span><span>Auto fix dashes<small>Rewrites hyphens and dashes in customer facing copy after every run</small></span></label>
+
+    <div class="divider"></div>
+    <div class="sec-title">Brand voice <span class="hint" id="voicePath"></span></div>
+    <textarea class="ta" id="sVoice" rows="16" style="font-family:var(--mono);font-size:12.5px"></textarea>
+    <div class="row"><button class="btn sm" id="saveVoice">Save to file</button><span style="font-size:12px;color:var(--faint)">Edits apply to the next run either way.</span></div>
+  </div>
+  <div class="drawer-foot"><button class="btn" id="cancelSettings">Cancel</button><button class="btn primary" id="applySettings">Apply</button></div>
+</aside>
+
+<div class="lightbox" id="lightbox"><img id="lbImg" alt=""></div>
+<div class="toasts" id="toasts"></div>
+
+<script src="/private/content-engine-demo/demo-api.js"></script>
+<script>
+(() => {
+"use strict";
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const ICON_OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12l5 5L20 7"/></svg>';
+const ICON_WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 7v6M12 17h.01"/></svg>';
+const SAVE_KEY = "content-engine:v1";
+
+const S = {
+  server: null,          // /api/state
+  photos: [],            // [{data: dataURL original, preview: dataURL jpeg, name}]
+  content: null,
+  issues: [],
+  history: [],
+  usage: {},
+  confirmed: new Set(),
+  images: [],            // [{id, label, png (b64) | null, error}]
+  scenes: new Set(),
+  busy: false,
+  prevKind: "markdown",
+  exports: null,
+};
+
+// ---------- API ----------
+async function api(path, body) {
+  const res = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+  if (path === "/api/zip") {
+    if (!res.ok) throw new Error((await res.json()).error || "Zip failed");
+    return res.blob();
+  }
+  const data = await res.json().catch(() => ({ error: `Server answered ${res.status}` }));
+  if (!res.ok) throw new Error(data.error || `Server answered ${res.status}`);
+  return data;
+}
+
+function toast(msg, kind = "err", ms = 6000) {
+  const t = document.createElement("div");
+  t.className = `toast ${kind}`;
+  t.innerHTML = `<b>${kind === "err" ? "Problem" : "Done"}</b><span>${esc(msg)}</span>`;
+  $("#toasts").append(t);
+  setTimeout(() => t.remove(), ms);
+}
+
+function setBusy(btn, busy, label) {
+  if (busy) { btn.dataset.label = btn.innerHTML; btn.innerHTML = `<span class="spin"></span>${label || ""}`; btn.disabled = true; }
+  else { btn.innerHTML = btn.dataset.label || btn.innerHTML; btn.disabled = false; }
+}
+
+// ---------- persistence (copy only; photos are too big for browser storage) ----------
+function persist() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      content: S.content, issues: S.issues, history: S.history.slice(-10), usage: S.usage,
+      confirmed: [...S.confirmed], brief: brief(), autofix: $("#sAutofix").checked,
+    }));
+  } catch (_) {}
+}
+function restore() {
+  try {
+    const d = JSON.parse(localStorage.getItem(SAVE_KEY) || "null");
+    if (!d) return;
+    Object.entries(d.brief || {}).forEach(([k, v]) => { const el = $(`[data-brief="${k}"]`); if (el) el.value = v; });
+    if (typeof d.autofix === "boolean") $("#sAutofix").checked = d.autofix;
+    if (d.content) {
+      S.content = d.content; S.issues = d.issues || []; S.history = d.history || []; S.usage = d.usage || {};
+      S.confirmed = new Set(d.confirmed || []);
+      showResult();
+    }
+  } catch (_) {}
+}
+
+// ---------- server state & settings ----------
+async function loadState() {
+  S.server = await (await fetch("/api/state")).json();
+  const chip = $("#modelChip");
+  chip.className = "chip model" + (S.server.demo ? " demo" : "");
+  $("#modelChipText").textContent = S.server.demo ? "Demo mode · no AWS calls" : `${S.server.text_model_id} · ${S.server.region}`;
+  renderSceneChips();
+}
+
+function openDrawer() {
+  const v = S.server;
+  $("#sRegion").value = v.region; $("#sProfile").value = v.profile;
+  $("#sText").value = v.text_model_id; $("#sImage").value = v.image_model_id;
+  if (!$("#sVoice").dataset.touched) $("#sVoice").value = v.voice;
+  $("#voicePath").textContent = v.voice_path.split(/[\\/]/).slice(-2).join("/");
+  $("#drawer").classList.add("on"); $("#scrim").classList.add("on");
+}
+function closeDrawer() { $("#drawer").classList.remove("on"); $("#scrim").classList.remove("on"); }
+
+async function applySettings() {
+  try {
+    S.server = await api("/api/settings", { region: $("#sRegion").value, profile: $("#sProfile").value, text_model_id: $("#sText").value, image_model_id: $("#sImage").value });
+    await loadState(); persist(); closeDrawer(); toast("Settings applied", "ok", 2500);
+  } catch (e) { toast(e.message); }
+}
+
+// ---------- photos ----------
+function readFile(f) {
+  return new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = bad; r.readAsDataURL(f); });
+}
+async function addFiles(files) {
+  const room = 5 - S.photos.length;
+  const list = [...files].slice(0, room);
+  if (files.length > room) toast(`Only 5 photos are used. ${files.length - room} skipped.`);
+  for (const f of list) {
+    const item = { name: f.name, data: null, preview: null };
+    S.photos.push(item); renderThumbs();
+    try {
+      item.data = await readFile(f);
+      const isHeic = /\.heic$/i.test(f.name) || f.type === "image/heic";
+      item.preview = isHeic ? (await api("/api/normalize", { photo: item.data })).preview : item.data;
+    } catch (e) {
+      S.photos.splice(S.photos.indexOf(item), 1);
+      toast(`Couldn't read ${f.name}: ${e.message}`);
+    }
+    renderThumbs();
+  }
+}
+function renderThumbs() {
+  $("#thumbs").innerHTML = S.photos.map((p, i) => p.preview
+    ? `<div class="thumb${i === 0 ? " hero" : ""}" data-i="${i}" title="${esc(p.name)}"><img src="${p.preview}" alt="">${i === 0 ? '<span class="tag">HERO</span>' : ""}<button class="x" data-rm="${i}" title="Remove">×</button></div>`
+    : `<div class="thumb loading"><span class="spin"></span></div>`).join("");
+  $("#drop").style.display = S.photos.length >= 5 ? "none" : "";
+  const hero = S.photos[0]?.preview;
+  $("#heroPrev").innerHTML = hero ? `<img src="${hero}" alt="">` : "Add a photo";
+  refreshButtons();
+}
+function readyPhotos() { return S.photos.filter(p => p.data).map(p => p.data); }
+
+// ---------- brief ----------
+function brief() { const b = {}; $$("[data-brief]").forEach(el => b[el.dataset.brief] = el.value); return b; }
+
+// ---------- generate / revise ----------
+function showWorking(title, sub) {
+  $("#empty").hidden = true; $("#result").hidden = true; $("#working").hidden = false;
+  $("#workingTitle").textContent = title; $("#workingSub").textContent = sub;
+}
+function hideWorking() { $("#working").hidden = true; }
+
+async function runGenerate() {
+  if (S.busy || !readyPhotos().length) return;
+  S.busy = true; refreshButtons(); setBusy($("#genBtn"), true, "Writing…");
+  const hadResult = !!S.content;
+  showWorking("Claude is looking at the photos", "Writing the page, SEO, captions, drop copy and tech pack. This usually takes 20 to 60 seconds.");
+  try {
+    const r = await api("/api/generate", { photos: readyPhotos(), brief: brief(), voice: $("#sVoice").value, auto_fix: $("#sAutofix").checked });
+    if (S.content) S.history.push(S.content);
+    S.content = r.content; S.issues = r.issues; S.usage = r.usage; S.confirmed = new Set(); S.images = [];
+    $("#garment").value = r.garment;
+    showResult(); selectTab("page"); persist();
+  } catch (e) {
+    toast(e.message);
+    hideWorking(); if (hadResult) $("#result").hidden = false; else $("#empty").hidden = false;
+  } finally { S.busy = false; setBusy($("#genBtn"), false); refreshButtons(); }
+}
+
+async function runRevise() {
+  const fb = $("#feedback").value.trim();
+  if (S.busy || !fb || !S.content) return;
+  if (!readyPhotos().length) return toast("Add the photos again first. Claude rereads them for a rewrite.");
+  S.busy = true; refreshButtons(); setBusy($("#reviseBtn"), true, "Rewriting…");
+  showWorking("Rewriting with your notes", "Applying the notes everywhere they're relevant and keeping the rest.");
+  try {
+    const r = await api("/api/revise", { photos: readyPhotos(), brief: brief(), content: S.content, feedback: fb, voice: $("#sVoice").value, auto_fix: $("#sAutofix").checked });
+    S.history.push(S.content);
+    S.content = r.content; S.issues = r.issues; S.usage = r.usage;
+    $("#feedback").value = "";
+    showResult(); persist(); toast("Rewritten. Undo takes you back.", "ok", 3000);
+  } catch (e) { toast(e.message); hideWorking(); $("#result").hidden = false; }
+  finally { S.busy = false; setBusy($("#reviseBtn"), false); refreshButtons(); }
+}
+
+function undo() {
+  if (!S.history.length) return;
+  S.content = S.history.pop();
+  recheck(); showResult(); persist();
+}
+
+// ---------- rendering results ----------
+function get(path) { return path.split(".").reduce((o, k) => o?.[k], S.content); }
+function set(path, val) {
+  const keys = path.split("."); let o = S.content;
+  keys.slice(0, -1).forEach(k => o = o[k]); o[keys.at(-1)] = val;
+}
+
+function autosize(el) { if (!el.classList.contains("auto")) return; el.style.height = "auto"; el.style.height = el.scrollHeight + 2 + "px"; }
+
+function showResult() {
+  hideWorking(); $("#empty").hidden = true; $("#result").hidden = false;
+  $("#rewriteWrap").hidden = false;
+  const c = S.content;
+  $$("[data-path]").forEach(el => {
+    const v = get(el.dataset.path);
+    el.value = el.hasAttribute("data-list") ? (v || []).join("\n") : (v ?? "");
+  });
+  renderAlts(); renderCaps(); renderHeader(); renderCounts(); renderSerp();
+  renderIssues(); renderConfirms(); renderGallery();
+  requestAnimationFrame(() => $$(".ta.auto").forEach(autosize));
+  S.exports = null; if ($('[data-pane="export"]').classList.contains("on")) loadExports();
+  refreshButtons();
+}
+
+function renderHeader() {
+  const c = S.content;
+  $("#rTitle").textContent = c.product_title || "Untitled";
+  $("#rShort").textContent = c.short_description || "";
+  const u = S.usage || {};
+  const v = S.history.length ? `version ${S.history.length + 1}` : "first version";
+  $("#rMeta").textContent = [v, u.inputTokens ? `${u.inputTokens.toLocaleString()} tokens in, ${(u.outputTokens || 0).toLocaleString()} out` : ""].filter(Boolean).join(" · ");
+  $("#versionHint").textContent = S.history.length ? `${S.history.length} earlier version${S.history.length > 1 ? "s" : ""}` : "";
+}
+
+function renderAlts() {
+  const alts = S.content.seo.image_alt_text || [];
+  $("#altList").innerHTML = alts.map((a, i) => `
+    <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px">
+      ${S.photos[i]?.preview ? `<img src="${S.photos[i].preview}" style="width:42px;height:56px;object-fit:cover;border-radius:6px;flex:none;border:1px solid var(--line)" alt="">` : ""}
+      <div style="flex:1"><label class="f">Alt text, photo ${i + 1}</label><textarea class="ta auto" data-alt="${i}" rows="1">${esc(a)}</textarea></div>
+    </div>`).join("");
+  $$("[data-alt]").forEach(el => { autosize(el); el.addEventListener("input", () => { S.content.seo.image_alt_text[+el.dataset.alt] = el.value; autosize(el); edited(); }); });
+}
+
+function renderCaps() {
+  $("#caps").innerHTML = (S.content.instagram_captions || []).map((c, i) => `
+    <div class="card cap">
+      <div class="cap-head"><span class="angle">${esc(c.angle)}</span><button class="btn sm" data-copycap="${i}">Copy</button></div>
+      <textarea class="ta auto" data-cap="${i}" rows="6">${esc(c.caption)}</textarea>
+      <textarea class="ta auto tags" data-tags="${i}" rows="2" style="background:transparent;border-color:transparent;padding:0">${esc((c.hashtags || []).join(" "))}</textarea>
+    </div>`).join("");
+  $$("[data-cap]").forEach(el => el.addEventListener("input", () => { S.content.instagram_captions[+el.dataset.cap].caption = el.value; autosize(el); edited(); }));
+  $$("[data-tags]").forEach(el => el.addEventListener("input", () => { S.content.instagram_captions[+el.dataset.tags].hashtags = el.value.split(/\s+/).filter(Boolean); autosize(el); edited(); }));
+  $$("[data-copycap]").forEach(b => b.addEventListener("click", () => {
+    const c = S.content.instagram_captions[+b.dataset.copycap];
+    copy(c.caption + "\n\n" + c.hashtags.join(" "), b);
+  }));
+  requestAnimationFrame(() => $$("#caps .ta").forEach(autosize));
+}
+
+function renderCounts() {
+  $$("[data-count]").forEach(el => {
+    const n = (get(el.dataset.count) || "").length, max = +el.dataset.max;
+    el.textContent = `${n} / ${max}`; el.classList.toggle("over", n > max);
+  });
+}
+function renderSerp() {
+  const s = S.content.seo;
+  $("#serpUrl").textContent = `yourstore.com › products › ${s.url_handle}`;
+  $("#serpTitle").textContent = s.meta_title;
+  $("#serpDesc").textContent = s.meta_description;
+}
+
+function fieldBase(f) { return f.replace(/\[\d+\].*$/, "").replace(/\[\d+\]/, ""); }
+const TAB_OF = f => f.startsWith("seo.") ? "seo" : f.startsWith("instagram") ? "ig" : f === "drop_announcement" ? "drop" : "page";
+
+function renderIssues() {
+  const n = S.issues.length;
+  $("#voiceIcon").className = "icon-status " + (n ? "warn" : "good");
+  $("#voiceIcon").innerHTML = n ? ICON_WARN : ICON_OK;
+  $("#voiceTitle").textContent = n ? `Voice check: ${n} thing${n > 1 ? "s" : ""} to look at` : "Voice check passed";
+  $("#fixBtn").hidden = !S.issues.some(i => i.problem === "dash");
+  $("#issues").innerHTML = n
+    ? S.issues.map((i, k) => `<div class="issue" data-issue="${k}"><span class="issue-field">${esc(i.field)}</span><div style="min-width:0"><div>${esc(i.problem)}</div><div class="issue-snip">${esc(i.snippet)}</div></div></div>`).join("")
+    : `<div style="color:var(--muted);font-size:13px">No dashes, no banned words, SEO lengths fine.</div>`;
+  $("#voicePanel").classList.toggle("collapsed", !n);
+  // flag fields + tab counters
+  const flagged = new Set(S.issues.map(i => fieldBase(i.field)));
+  $$("[data-path]").forEach(el => el.classList.toggle("flagged", flagged.has(el.dataset.path)));
+  $$("[data-alt]").forEach(el => el.classList.toggle("flagged", S.issues.some(i => i.field === `seo.image_alt_text[${el.dataset.alt}]`)));
+  $$("[data-cap]").forEach(el => el.classList.toggle("flagged", S.issues.some(i => i.field === `instagram_captions[${el.dataset.cap}].caption`)));
+  const per = {};
+  S.issues.forEach(i => per[TAB_OF(i.field)] = (per[TAB_OF(i.field)] || 0) + 1);
+  $$("[data-tabn]").forEach(el => { const v = per[el.dataset.tabn]; el.hidden = !v; el.textContent = v || ""; });
+  $$("[data-issue]").forEach(el => el.addEventListener("click", () => jumpTo(S.issues[+el.dataset.issue].field)));
+}
+
+function jumpTo(field) {
+  selectTab(TAB_OF(field));
+  let el;
+  const alt = field.match(/^seo\.image_alt_text\[(\d+)\]/), cap = field.match(/^instagram_captions\[(\d+)\]/);
+  if (alt) el = $(`[data-alt="${alt[1]}"]`); else if (cap) el = $(`[data-cap="${cap[1]}"]`);
+  else el = $(`[data-path="${fieldBase(field)}"]`);
+  if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.focus(), 250); }
+}
+
+function renderConfirms() {
+  const items = S.content.needs_confirmation || [];
+  const done = items.filter(x => S.confirmed.has(x)).length;
+  $("#confirmBadge").textContent = `${done} / ${items.length}`;
+  $("#confirmBadge").className = "badge " + (done === items.length ? "good" : "warn");
+  $("#confirmIcon").className = "icon-status " + (done === items.length ? "good" : "warn");
+  $("#confirmIcon").innerHTML = done === items.length ? ICON_OK : ICON_WARN;
+  $("#confirmBar").style.width = items.length ? `${(done / items.length) * 100}%` : "100%";
+  $("#confirms").innerHTML = items.length
+    ? items.map((x, i) => `<label class="chk${S.confirmed.has(x) ? " done" : ""}"><input type="checkbox" data-conf="${i}"${S.confirmed.has(x) ? " checked" : ""}><span>${esc(x)}</span></label>`).join("")
+    : `<div style="color:var(--muted);font-size:13px">Nothing was guessed.</div>`;
+  $$("[data-conf]").forEach(el => el.addEventListener("change", () => {
+    const x = items[+el.dataset.conf];
+    el.checked ? S.confirmed.add(x) : S.confirmed.delete(x);
+    renderConfirms(); persist();
+  }));
+}
+
+// ---------- editing ----------
+let recheckTimer;
+function edited() {
+  renderHeader(); renderCounts(); renderSerp(); S.exports = null;
+  clearTimeout(recheckTimer); recheckTimer = setTimeout(recheck, 500);
+  persist();
+}
+async function recheck(fix = false) {
+  try {
+    const r = await api("/api/voice-check", { content: S.content, fix });
+    S.issues = r.issues;
+    if (fix) { S.content = r.content; showResult(); toast("Dashes fixed", "ok", 2500); }
+    else renderIssues();
+    persist();
+  } catch (e) { toast(e.message); }
+}
+
+// ---------- tabs ----------
+function selectTab(name) {
+  $$(".tab").forEach(t => t.classList.toggle("on", t.dataset.tab === name));
+  $$(".pane").forEach(p => p.classList.toggle("on", p.dataset.pane === name));
+  requestAnimationFrame(() => $$(`[data-pane="${name}"] .ta.auto`).forEach(autosize));
+  if (name === "export") loadExports();
+}
+
+// ---------- imagery ----------
+function renderSceneChips() {
+  const names = [...Object.keys(S.server.scenes), ...[...S.scenes].filter(s => !(s in S.server.scenes))];
+  $("#sceneChips").innerHTML = names.map(s => `<button class="schip${S.scenes.has(s) ? " on" : ""}" data-scene="${esc(s)}" title="${esc(S.server.scenes[s] || "Your own scene")}">${esc(s)}</button>`).join("");
+  $$("[data-scene]").forEach(b => b.addEventListener("click", () => {
+    const s = b.dataset.scene; S.scenes.has(s) ? S.scenes.delete(s) : S.scenes.add(s); renderSceneChips(); refreshButtons();
+  }));
+}
+function imageJobs() {
+  const jobs = [];
+  if ($("#cutout").checked) jobs.push({ kind: "cutout", value: "", label: "Clean cutout" });
+  S.scenes.forEach(s => jobs.push({ kind: "scene", value: s, label: `Scene: ${s}` }));
+  $("#colors").value.split(",").map(x => x.trim()).filter(Boolean).forEach(c => jobs.push({ kind: "colorway", value: c, label: `Colorway: ${c}` }));
+  return jobs;
+}
+async function runImages() {
+  const jobs = imageJobs(); const hero = S.photos[0]?.data;
+  if (!jobs.length) return;
+  if (!hero) return toast("Add a photo first. Imagery is built on the hero photo.");
+  const btn = $("#imgBtn"); setBusy(btn, true, `0 / ${jobs.length}`);
+  let done = 0;
+  const entries = jobs.map(j => ({ id: Math.random().toString(36).slice(2), label: j.label, png: null, error: null, job: j }));
+  S.images.push(...entries); renderGallery();
+  // two at a time keeps it quick without tripping Bedrock rate limits
+  const queue = [...entries];
+  async function worker() {
+    while (queue.length) {
+      const e = queue.shift();
+      try {
+        const r = await api("/api/image", { photo: hero, kind: e.job.kind, value: e.job.value, garment: $("#garment").value, seed: $("#seed").value });
+        e.png = r.png; e.label = r.label;
+      } catch (err) { e.error = err.message; }
+      done++; btn.innerHTML = `<span class="spin"></span>${done} / ${jobs.length}`; renderGallery();
+    }
+  }
+  await Promise.all([worker(), worker()]);
+  setBusy(btn, false); refreshButtons(); S.exports = null;
+  const failed = entries.filter(e => e.error);
+  if (failed.length) toast(failed[0].error);
+}
+function renderGallery() {
+  $("#gallery").innerHTML = S.images.map(e => `
+    <div class="card gimg">
+      ${e.png ? `<div class="pic" data-zoom="${e.id}" style="background-image:url(data:image/png;base64,${e.png})"></div>`
+        : e.error ? `<div class="pic failed">${esc(e.error)}</div>` : `<div class="pic pending"><span class="spin"></span></div>`}
+      <div class="cap-row"><span title="${esc(e.label)}">${esc(e.label)}</span>
+        ${e.png ? `<button class="btn ghost sm" data-dl="${e.id}" title="Download">↓</button>` : ""}
+        ${e.png || e.error ? `<button class="btn ghost sm" data-rmimg="${e.id}" title="Remove">×</button>` : ""}
+      </div>
+    </div>`).join("");
+  const find = id => S.images.find(e => e.id === id);
+  $$("[data-zoom]").forEach(el => el.addEventListener("click", () => { $("#lbImg").src = "data:image/png;base64," + find(el.dataset.zoom).png; $("#lightbox").classList.add("on"); }));
+  $$("[data-dl]").forEach(el => el.addEventListener("click", () => { const e = find(el.dataset.dl); download(b64Blob(e.png, "image/png"), slug(e.label) + ".png"); }));
+  $$("[data-rmimg]").forEach(el => el.addEventListener("click", () => { S.images = S.images.filter(e => e.id !== el.dataset.rmimg); renderGallery(); S.exports = null; }));
+  const n = S.images.filter(e => e.png).length;
+  $("#zipNote").textContent = n ? `.zip with copy, CSV, JSON and ${n} image${n > 1 ? "s" : ""}` : ".zip with copy, CSV and JSON";
+}
+
+// ---------- export ----------
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+function b64Blob(b64, type) { const bin = atob(b64); const a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return new Blob([a], { type }); }
+function download(blob, name) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+const doneImages = () => S.images.filter(e => e.png).map(e => ({ label: e.label, png: e.png }));
+
+async function loadExports() {
+  if (!S.content) return;
+  if (!S.exports) {
+    try { S.exports = await api("/api/exports", { content: S.content, price: brief().price }); }
+    catch (e) { return toast(e.message); }
+  }
+  $("#preview").textContent = S.exports[S.prevKind];
+}
+async function doExport(kind) {
+  try {
+    if (kind === "zip") {
+      const blob = await api("/api/zip", { content: S.content, price: brief().price, images: doneImages() });
+      return download(blob, `${S.content.seo.url_handle || "product"}.zip`);
+    }
+    await loadExports();
+    const h = S.exports.handle;
+    const map = { markdown: [`${h}.md`, "text/markdown"], csv: [`${h}-shopify.csv`, "text/csv"], json: [`${h}.json`, "application/json"] };
+    download(new Blob([S.exports[kind]], { type: map[kind][1] }), map[kind][0]);
+  } catch (e) { toast(e.message); }
+}
+async function saveOutputs() {
+  const btn = $("#saveBtn"); setBusy(btn, true, "Saving…");
+  try { const r = await api("/api/save", { content: S.content, price: brief().price, images: doneImages() }); toast(`Saved to ${r.folder}`, "ok", 8000); }
+  catch (e) { toast(e.message); } finally { setBusy(btn, false); }
+}
+async function copy(text, btn) {
+  try { await navigator.clipboard.writeText(text); } catch (_) {
+    const t = document.createElement("textarea"); t.value = text; document.body.append(t); t.select(); document.execCommand("copy"); t.remove();
+  }
+  if (btn) { const o = btn.textContent; btn.textContent = "Copied"; setTimeout(() => btn.textContent = o, 1200); }
+}
+
+// ---------- buttons ----------
+function refreshButtons() {
+  const photos = readyPhotos().length > 0, uploading = S.photos.some(p => !p.data);
+  if (!$("#genBtn").querySelector(".spin")) {
+    $("#genBtn").disabled = S.busy || !photos || uploading;
+    $("#genBtn").textContent = S.content ? "Write fresh content" : "Write content";
+  }
+  $("#reviseBtn").disabled = S.busy || !S.content || !$("#feedback").value.trim();
+  $("#undoBtn").disabled = S.busy || !S.history.length;
+  const n = imageJobs().length;
+  if (!$("#imgBtn").querySelector(".spin")) {
+    $("#imgBtn").disabled = !n || !photos;
+    $("#imgBtn").textContent = n ? `Generate ${n} image${n > 1 ? "s" : ""}` : "Generate images";
+  }
+}
+
+function newProduct() {
+  if (S.content && !confirm("Start a new product? The current copy is cleared (download it first if you need it).")) return;
+  S.photos = []; S.content = null; S.issues = []; S.history = []; S.images = []; S.confirmed = new Set(); S.usage = {};
+  $$("[data-brief]").forEach(el => el.value = ""); $("#feedback").value = "";
+  $("#result").hidden = true; $("#empty").hidden = false; $("#rewriteWrap").hidden = true;
+  renderThumbs(); renderGallery(); persist();
+}
+
+// ---------- wiring ----------
+function wire() {
+  const drop = $("#drop"), file = $("#file");
+  drop.addEventListener("click", () => file.click());
+  file.addEventListener("change", () => { addFiles(file.files); file.value = ""; });
+  ["dragenter", "dragover"].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); if (ev === "drop" || e.target === document.documentElement) drop.classList.remove("over"); }));
+  document.addEventListener("drop", e => { if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files); });
+  document.addEventListener("paste", e => { const f = [...(e.clipboardData?.files || [])].filter(x => x.type.startsWith("image/")); if (f.length) addFiles(f); });
+
+  $("#thumbs").addEventListener("click", e => {
+    const rm = e.target.closest("[data-rm]");
+    if (rm) { S.photos.splice(+rm.dataset.rm, 1); renderThumbs(); return; }
+    const t = e.target.closest(".thumb[data-i]");
+    if (t && +t.dataset.i > 0) { const [p] = S.photos.splice(+t.dataset.i, 1); S.photos.unshift(p); renderThumbs(); toast("Hero photo changed. Alt text order follows the photo order on the next run.", "ok", 3500); }
+  });
+
+  $$("[data-brief]").forEach(el => el.addEventListener("input", () => { S.exports = null; persist(); }));
+  $("#genBtn").addEventListener("click", runGenerate);
+  $("#reviseBtn").addEventListener("click", runRevise);
+  $("#undoBtn").addEventListener("click", undo);
+  $("#feedback").addEventListener("input", refreshButtons);
+  $("#feedback").addEventListener("keydown", e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); runRevise(); } });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && document.activeElement !== $("#feedback")) { e.preventDefault(); runGenerate(); }
+    if (e.key === "Escape") { closeDrawer(); $("#lightbox").classList.remove("on"); }
+  });
+
+  $$("[data-path]").forEach(el => el.addEventListener("input", () => {
+    set(el.dataset.path, el.hasAttribute("data-list") ? el.value.split("\n").map(s => s.trim()).filter(Boolean) : el.value);
+    autosize(el); edited();
+  }));
+  $$("[data-copy]").forEach(b => b.addEventListener("click", () => copy(get(b.dataset.copy), b)));
+  $("#fixBtn").addEventListener("click", e => { e.stopPropagation(); recheck(true); });
+  $$("[data-collapse]").forEach(h => h.addEventListener("click", () => $("#" + h.dataset.collapse).classList.toggle("collapsed")));
+  $$(".tab").forEach(t => t.addEventListener("click", () => selectTab(t.dataset.tab)));
+
+  $("#cutout").addEventListener("change", refreshButtons);
+  $("#colors").addEventListener("input", refreshButtons);
+  $("#customScene").addEventListener("keydown", e => {
+    if (e.key !== "Enter" || !e.target.value.trim()) return;
+    S.scenes.add(e.target.value.trim()); e.target.value = ""; renderSceneChips(); refreshButtons();
+  });
+  $("#imgBtn").addEventListener("click", runImages);
+  $("#lightbox").addEventListener("click", () => $("#lightbox").classList.remove("on"));
+
+  $$("[data-export]").forEach(b => b.addEventListener("click", () => doExport(b.dataset.export)));
+  $("#quickZip").addEventListener("click", () => doExport("zip"));
+  $$("#prevSeg button").forEach(b => b.addEventListener("click", () => {
+    S.prevKind = b.dataset.prev; $$("#prevSeg button").forEach(x => x.classList.toggle("on", x === b)); loadExports();
+  }));
+  $("#copyPrev").addEventListener("click", e => copy($("#preview").textContent, e.currentTarget));
+  $("#saveBtn").addEventListener("click", saveOutputs);
+
+  $("#settingsBtn").addEventListener("click", openDrawer);
+  $("#closeDrawer").addEventListener("click", closeDrawer);
+  $("#cancelSettings").addEventListener("click", closeDrawer);
+  $("#scrim").addEventListener("click", closeDrawer);
+  $("#applySettings").addEventListener("click", applySettings);
+  $("#sAutofix").addEventListener("change", persist);
+  $("#sVoice").addEventListener("input", e => e.target.dataset.touched = "1");
+  $("#saveVoice").addEventListener("click", async e => {
+    const b = e.currentTarget; setBusy(b, true, "Saving…");
+    try { await api("/api/voice", { voice: $("#sVoice").value }); S.server.voice = $("#sVoice").value; toast("Brand voice saved", "ok", 2500); }
+    catch (err) { toast(err.message); } finally { setBusy(b, false); }
+  });
+  $("#checkBtn").addEventListener("click", async e => {
+    const b = e.currentTarget; setBusy(b, true, "Testing…");
+    try {
+      await api("/api/settings", { region: $("#sRegion").value, profile: $("#sProfile").value, text_model_id: $("#sText").value, image_model_id: $("#sImage").value });
+      const r = await api("/api/check");
+      const out = $("#checkOut"); out.hidden = false;
+      out.innerHTML = `<div><b>Claude</b><span style="color:${/^Answered|Demo/.test(r.claude) ? "var(--good)" : "var(--bad)"}">${esc(r.claude)}</span></div><div><b>Nova Canvas</b><span style="color:${/^Available|Demo/.test(r.canvas) ? "var(--good)" : "var(--bad)"}">${esc(r.canvas)}</span></div>`;
+      $("#modelChip").classList.toggle("ok", r.ok && !S.server.demo); $("#modelChip").classList.toggle("bad", !r.ok);
+      await loadState();
+    } catch (err) { toast(err.message); } finally { setBusy(b, false); }
+  });
+  $("#modelsBtn").addEventListener("click", async e => {
+    const b = e.currentTarget; setBusy(b, true, "Loading…");
+    try {
+      const r = await api("/api/models");
+      $("#textModels").innerHTML = r.text.map(m => `<option value="${esc(m)}">`).join("");
+      $("#imageModels").innerHTML = r.image.map(m => `<option value="${esc(m)}">`).join("");
+      toast(`${r.text.length} Claude profile${r.text.length === 1 ? "" : "s"} found. Click the model field to pick one.`, "ok", 4000);
+    } catch (err) { toast(err.message); } finally { setBusy(b, false); }
+  });
+  $("#newBtn").addEventListener("click", newProduct);
+}
+
+(async function init() {
+  wire();
+  try { await loadState(); } catch (e) { toast("Can't reach the local server. Is gui.py still running?"); }
+  $("#sVoice").value = S.server?.voice || "";
+  restore(); renderThumbs(); refreshButtons();
+})();
+})();
+</script>
+</body>
+</html>
